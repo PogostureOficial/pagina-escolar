@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fondos de la Nación: el juego</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#16123a;--panel:#241c5c;--ink:#f4f0ff;--dim:#a9a0d8;--cy:#38f0ff;--ye:#ffd23f;--mg:#ff4fa3;--gr:#5dff8a;--rd:#ff5a5a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*:before,*:after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'VT323','Courier New',monospace;font-size:22px;line-height:1.25;
+background-image:linear-gradient(rgba(56,240,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(56,240,255,.07) 1px,transparent 1px);background-size:32px 32px}
+h1,h2,h3,.px{font-family:'Press Start 2P','Courier New',monospace;font-weight:400;line-height:1.5}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:4px solid var(--ye);display:flex;gap:8px;overflow-x:auto;padding:10px 12px}
+nav a{flex:none;color:var(--ink);text-decoration:none;border:3px solid var(--dim);background:var(--panel);padding:6px 12px;font-size:20px;white-space:nowrap}
+nav a[aria-current=page]{border-color:var(--ye);background:#33287a;color:var(--ye)}
+nav a:focus-visible,.btn:focus-visible,.slot:focus-visible,.x:focus-visible,input:focus-visible{outline:3px solid var(--cy);outline-offset:3px}
+main{max-width:760px;margin:0 auto;padding:16px}
+.hero{display:flex;align-items:center;gap:18px;margin:14px 0 22px}
+.ava{font-size:64px;width:112px;height:112px;display:grid;place-items:center;background:var(--panel);border:5px solid var(--c);box-shadow:6px 6px 0 rgba(0,0,0,.45);flex:none}
+.hero h1{font-size:clamp(16px,4.6vw,26px);color:var(--c);margin:0 0 8px;text-shadow:3px 3px 0 rgba(0,0,0,.5)}
+.cls{color:var(--dim);font-size:24px}
+.sheet{background:var(--panel);border:4px solid var(--c);box-shadow:6px 6px 0 rgba(0,0,0,.45);padding:18px}
+.stat{display:grid;grid-template-columns:120px 1fr 40px;gap:10px;align-items:center;margin:10px 0;font-size:24px}
+.track{height:22px;background:var(--bg);border:3px solid var(--dim);display:flex;gap:3px;padding:2px}
+.track i{flex:1;background:#2b2470}.track i.on{background:var(--c)}
+.stat b{font-family:'Press Start 2P',monospace;font-weight:400;font-size:13px;text-align:right}
+h2{font-size:14px;color:var(--cy);margin:30px 0 14px}
+.btn{font-family:'Press Start 2P',monospace;font-size:12px;background:var(--ye);color:#16123a;border:0;padding:14px 18px;cursor:pointer;box-shadow:0 5px 0 #b38900}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #b38900}
+.btn[disabled]{background:#5a5290;box-shadow:0 5px 0 #3b3290;cursor:not-allowed;color:#c9c2ee}
+.btn.alt{background:var(--dim);box-shadow:0 5px 0 #6b64a0;font-size:10px}
+.deckbar{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.left{color:var(--ye)}
+.slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:18px}
+.slot{aspect-ratio:3/4;max-height:180px;background:repeating-linear-gradient(45deg,#2b2470 0 8px,#241c5c 8px 16px);border:4px solid var(--dim);color:var(--dim);display:grid;place-items:center;text-align:center;padding:8px;font:inherit;cursor:default}
+.slot.on{background:var(--panel);border-color:var(--c);color:var(--ink);cursor:pointer}
+.slot .em{font-size:34px;display:block}.slot b{font-family:'Press Start 2P',monospace;font-weight:400;font-size:8px;line-height:1.5;color:var(--c)}
+.slot.q{font-family:'Press Start 2P',monospace;font-size:26px}
+.hud{background:var(--bg);border:4px solid var(--ye);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.hud b{font-family:'Press Start 2P',monospace;font-weight:400;font-size:14px}
+.ok{color:var(--gr)}.bad{color:var(--rd)}
+.row{display:grid;grid-template-columns:170px 1fr 56px;gap:12px;align-items:center;padding:8px 0;border-bottom:2px dashed #3b3290}
+.row label{color:var(--c)}
+input[type=range]{width:100%;accent-color:var(--c);height:28px}
+.pts{text-align:right;font-family:'Press Start 2P',monospace;font-size:12px}
+.ov{position:fixed;inset:0;z-index:50;background:rgba(10,7,32,.92);display:none;align-items:center;justify-content:center;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));overflow:auto}
+.ov.show{display:flex}
+.big{position:relative;width:100%;max-width:560px;background:var(--panel);border:6px solid var(--c);box-shadow:10px 10px 0 rgba(0,0,0,.5);padding:28px 22px 24px;text-align:center;animation:fl .5s steps(5)}
+@keyframes fl{from{transform:scale(.6) rotateY(90deg)}to{transform:none}}
+@media(prefers-reduced-motion:reduce){.big{animation:none}}
+.big .em{font-size:72px;line-height:1}
+.big h2{font-size:clamp(14px,4vw,20px);color:var(--c);margin:14px 0}
+.big p{font-size:26px;margin:0 0 14px}
+.x{position:absolute;top:8px;right:8px;width:48px;height:48px;background:var(--rd);color:#fff;border:0;font-family:'Press Start 2P',monospace;font-size:18px;cursor:pointer;box-shadow:0 4px 0 #a02c2c}
+.eff{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.eff span{border:3px solid;padding:2px 8px;font-size:20px}
+.eff .up{border-color:var(--gr);color:var(--gr)}.eff .dn{border-color:var(--rd);color:var(--rd)}
+.syncbox{margin:0 0 16px;padding:10px 12px;border:3px solid var(--ye);background:var(--panel);font-size:20px}
+.syncbox small{display:block;color:var(--dim);font-size:18px;margin-top:4px}
+.log{margin-top:18px;padding:12px;background:var(--bg);border:3px solid var(--dim)}.log h2{margin:0 0 8px}.log ul{margin:0;padding-left:24px}.log li{padding:4px 0}
+.event-log{margin:12px 0;padding:12px;border:3px solid var(--event-color,var(--dim));background:var(--panel)}.event-log h3{font-size:10px;color:var(--event-color,var(--cy));margin:0 0 8px}.event-log p{margin:0 0 8px}.event-log .eff{justify-content:flex-start}
+@media(max-width:520px){.stat{grid-template-columns:96px 1fr 34px}.row{grid-template-columns:1fr 56px}.row input{grid-column:1/-1;grid-row:2}.ava{width:84px;height:84px;font-size:46px}}
+</style>
+</head>
+<body>
+<main id="page"></main>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
+import { getDatabase, ref, onValue, runTransaction, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB9DFNwVrGh236MdOF9zxcXP8ZEJhh7tuk",
+  authDomain: "proyecto-naciones.firebaseapp.com",
+  databaseURL: "https://proyecto-naciones-default-rtdb.firebaseio.com",
+  projectId: "proyecto-naciones",
+  storageBucket: "proyecto-naciones.firebasestorage.app",
+  messagingSenderId: "862886174294",
+  appId: "1:862886174294:web:12a26518a74da2b3faa5f7",
+  measurementId: "G-925FKZ0MCW"
+};
+window.fondosSync = {ready:false, room:new URLSearchParams(location.search).get('sala') || 'aula', state:null, status:'Configuración de sincronización pendiente'};
+window.fondosReady = (async()=>{
+  if(!firebaseConfig?.apiKey || !firebaseConfig?.databaseURL) return;
+  try {
+    const app=initializeApp(firebaseConfig), db=getDatabase(app), roomRef=ref(db,'salas/'+window.fondosSync.room);
+    window.fondosSync.update=async updater=>{const result=await runTransaction(roomRef,current=>updater(current||null));return result.snapshot.val()};
+    window.fondosSync.timestamp=serverTimestamp;
+    onValue(roomRef,snapshot=>{window.fondosSync.state=snapshot.val();window.fondosSync.ready=true;window.fondosSync.status='Conectado · sala '+window.fondosSync.room;if(!snapshot.exists())window.fondosSync.update(current=>current||{stats:{},drawn:[],history:[]}).catch(error=>{window.fondosSync.status='No se pudo iniciar la sala: '+error.message;window.dispatchEvent(new Event('fondos-sync'))});window.dispatchEvent(new Event('fondos-sync'))},error=>{window.fondosSync.status='Error de conexión: '+error.message;window.dispatchEvent(new Event('fondos-sync'))});
+  } catch(error) { window.fondosSync.status='Error de conexión: '+error.message;window.dispatchEvent(new Event('fondos-sync')) }
+})();
+</script>
+
+<div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="otitle">
+  <div class="big" id="big">
+    <button class="x" type="button" id="close" aria-label="Cerrar carta">X</button>
+    <div class="em" id="oem"></div><h2 id="otitle"></h2><p id="odesc"></p><div class="eff" id="oeff"></div>
+  </div>
+</div>
+
+<script>
+const P=[
+{id:'ba',n:'Buenos Aires',e:'🏙️',c:'#ff4fa3',cls:'Tanque urbano',max:30,s:{Población:10,Economía:10,Necesidad:8,Infraestructura:6,Recursos:8,'Influencia política':10,Gestión:5}},
+{id:'co',n:'Córdoba',e:'🚧',c:'#38f0ff',cls:'Mago logístico',max:40,s:{Población:8,Economía:8,Necesidad:5,Infraestructura:7,Recursos:6,'Influencia política':7,Gestión:8}},
+{id:'me',n:'Mendoza',e:'🍇',c:'#b57bff',cls:'Arquero del agua',max:40,s:{Población:6,Economía:7,Necesidad:5,Infraestructura:6,Recursos:8,'Influencia política':6,Gestión:7}},
+{id:'sa',n:'Salta',e:'⛰️',c:'#ffd23f',cls:'Explorador del norte',max:40,s:{Población:6,Economía:5,Necesidad:8,Infraestructura:5,Recursos:8,'Influencia política':5,Gestión:6}},
+{id:'mi',n:'Misiones',e:'🌿',c:'#5dff8a',cls:'Guardabosques',max:40,s:{Población:6,Economía:6,Necesidad:7,Infraestructura:5,Recursos:7,'Influencia política':5,Gestión:6}},
+{id:'tf',n:'Tierra del Fuego',e:'❄️',c:'#7fb4ff',cls:'Centinela austral',max:40,s:{Población:2,Economía:6,Necesidad:6,Infraestructura:5,Recursos:7,'Influencia política':4,Gestión:6}}
+];
+const EV=[
+{t:'Sequía histórica',e:'☀️',c:'#ffb347',d:'No llueve hace meses y el sector agrario cae un 80%. Faltan ingresos y crece la ayuda que necesitan los productores.',fx:{co:{Economía:-3,Necesidad:2},me:{Economía:-2,Necesidad:2},sa:{Economía:-1,Necesidad:2}}},
+{t:'Temporada récord en las Cataratas',e:'🌈',c:'#5dff8a',d:'El turismo en Iguazú sube un 60% y llegan visitantes de todo el mundo. Hay más ingresos, pero también más presión sobre el ambiente.',fx:{mi:{Recursos:1,Economía:2,Necesidad:-1}}},
+{t:'Se hunde la industria electrónica',e:'📉',c:'#ff5a5a',d:'Bajan los subsidios y las ventas de electrónica caen un 60%. Peligran los empleos en la isla.',fx:{tf:{Infraestructura:-3,Economía:-2,Necesidad:2}}},
+{t:'Colapso del transporte en el AMBA',e:'🚆',c:'#ff4fa3',d:'Un paro y fallas de infraestructura frenan trenes y colectivos durante semanas. Millones de personas no llegan a trabajar.',fx:{ba:{Economía:-1,Necesidad:2,Infraestructura:-1}}},
+{t:'Inundaciones en el norte',e:'🌊',c:'#38f0ff',d:'Las lluvias cortan caminos rurales y aíslan comunidades. El turismo se frena y hacen falta obras urgentes.',fx:{sa:{Necesidad:2,Recursos:-2},mi:{Necesidad:1,Recursos:-2}}}
+];
+const SL={ba:'buenosaires',co:'cordoba',me:'mendoza',sa:'salta',mi:'misiones',tf:'tierradelfuego'};
+const MIN={ba:25,co:14,me:12,sa:12,mi:10,tf:6};
+let voteHTML='';
+const $=s=>document.querySelector(s);
+const BASE=P.map(p=>({...p.s}));
+const vals=Object.fromEntries(P.map(p=>[p.id,0]));
+let deck=[],drawn=[],chgs={};
+const LOCAL_KEY='fondos-nacion-estado-v1';
+function saveLocalState(){localStorage.setItem(LOCAL_KEY,JSON.stringify({stats:Object.fromEntries(P.map(p=>[p.id,p.s])),drawn,history:window.fondosSync.state?.history||[]}))}
+function loadLocalState(){try{const saved=JSON.parse(localStorage.getItem(LOCAL_KEY)||'null');if(saved){drawn=saved.drawn||[];P.forEach((p,i)=>p.s={...(saved.stats?.[p.id]||BASE[i])});window.fondosSync.state={...(window.fondosSync.state||{}),history:saved.history||[]}}}catch(error){console.warn('No se pudo leer el estado local',error)}}
+loadLocalState();
+
+function newDeck(){deck=EV.map((_,i)=>i).sort(()=>Math.random()-.5);drawn=[];chgs={};P.forEach((p,i)=>p.s={...BASE[i]})}
+newDeck();
+
+function provincePage(p){
+  return `<div class="hero" style="--c:${p.c}"><div class="ava">${p.e}</div><div><h1>${p.n}</h1><div class="cls">Clase: ${p.cls}</div></div></div>
+  <div class="syncbox" id="sync-status"></div><section class="sheet" style="--c:${p.c}" aria-label="Estadísticas de ${p.n}">${Object.entries(p.s).map(([k,v])=>`<div class="stat"><span>${k}</span><div class="track" aria-hidden="true">${Array.from({length:10},(_,i)=>`<i class="${i<v?'on':''}"></i>`).join('')}</div><b>${v}</b></div>`).join('')}</section>
+  <section class="log"><h2>Cartas que afectaron a ${p.n}</h2>${(window.fondosSync.state?.history||[]).filter(x=>x.province===p.id).slice().reverse().map(x=>{const ev=EV[x.card];return ev?`<article class="event-log" style="--event-color:${ev.c}"><h3>${ev.e} ${ev.t}</h3><p>${ev.d}</p><div class="eff">${x.changes.map(change=>`<span class="${change.delta>0?'up':'dn'}">${change.stat}: ${change.delta>0?'+':''}${change.delta} (${change.before} → ${change.after})</span>`).join('')}</div></article>`:''}).join('')||'<p>Todavía no salió ninguna carta que haya modificado las estadísticas de esta provincia.</p>'}</section>`;
+}
+function gamePage(){
+  const sharedDrawn=window.fondosSync.ready&&window.fondosSync.state?.drawn?window.fondosSync.state.drawn:drawn;
+  const remaining=EV.map((_,i)=>i).filter(i=>!sharedDrawn.includes(i));
+  return `<div class="syncbox" id="sync-status"></div><h2>Cartas del destino</h2>
+  <div class="deckbar"><button class="btn" type="button" id="draw" ${remaining.length?'':'disabled'}>🎴 Sacar carta</button>
+  ${remaining.length?'':'<button class="btn alt" type="button" id="shuffle">Barajar de nuevo</button>'}
+  <span class="left">Quedan ${remaining.length} de ${EV.length} cartas</span></div>
+  <div class="slots" id="slots">${EV.map((ev,i)=>sharedDrawn.includes(i)?`<button class="slot on" style="--c:${ev.c}" data-i="${i}" type="button"><span><span class="em">${ev.e}</span><b>${ev.t}</b></span></button>`:`<div class="slot q" aria-label="Carta boca abajo">?</div>`).join('')}</div>
+  <h2>Votación: repartir los 100 puntos</h2>
+  <div class="hud"><span>Repartidos: <b id="used"></b>/100</span><span>Libres: <b id="free"></b></span><button class="btn alt" type="button" id="reset">Reiniciar</button></div>
+  <div id="rows">${P.map(p=>`<div class="row" style="--c:${p.c}"><label for="r-${p.id}">${p.e} ${p.n}${p.max<40?' (máx. '+p.max+')':''}</label><input type="range" id="r-${p.id}" min="0" max="${p.max}" value="${vals[p.id]}" data-id="${p.id}"><div class="pts" id="v-${p.id}">${vals[p.id]}</div></div>`).join('')}</div>
+  <div style="margin-top:18px"><button class="btn" type="button" id="vote">🗳️ Votar propuesta</button></div>
+  <div class="hud" id="result" style="margin-top:16px;display:block" aria-live="polite">${voteHTML||'Todavía no hay votación. Repartí los 100 puntos y tocá el botón.'}</div>`;
+}
+function upd(){
+  const u=Object.values(vals).reduce((a,b)=>a+b,0);
+  $('#used').textContent=u;$('#used').className=u>100?'bad':u===100?'ok':'';
+  $('#free').textContent=100-u;$('#free').className=u>100?'bad':'';
+  P.forEach(p=>{$('#v-'+p.id).textContent=vals[p.id]});
+}
+function route(){
+  const h=location.hash.slice(1),p=P.find(x=>SL[x.id]===h);
+  if(p)$('#page').innerHTML=provincePage(p);
+  else if(h==='votacion'){$('#page').innerHTML=gamePage();upd()}
+  else $('#page').innerHTML=`<section class="sheet" style="--c:var(--ye)"><h1 style="color:var(--ye);font-size:18px;margin:0 0 12px">FONDOS DE LA NACIÓN</h1><p style="margin:0 0 10px">Esta página tiene 7 secciones separadas. Cada una se abre agregando su nombre después del # en la dirección:</p><p style="margin:0;color:var(--cy)">#buenosaires<br>#cordoba<br>#mendoza<br>#salta<br>#misiones<br>#tierradelfuego<br>#votacion</p></section>`;
+  window.scrollTo(0,0);
+  const box=$('#sync-status');if(box)box.innerHTML=`${window.fondosSync?.status||'Preparando conexión…'}<small>Para compartir el estado, todos deben usar el mismo enlace y código de sala.</small>`;
+}
+function openCard(i){
+  const ev=EV[i];
+  $('#big').style.setProperty('--c',ev.c);
+  $('#oem').textContent=ev.e;$('#otitle').textContent=ev.t;$('#odesc').textContent=ev.d;
+  $('#oeff').innerHTML=chgs[i]||'';
+  $('#ov').classList.add('show');$('#close').focus();
+}
+function closeCard(){$('#ov').classList.remove('show')}
+function draw(){
+  const sync=window.fondosSync;
+  const currentDrawn=sync?.ready?(sync.state?.drawn||[]):drawn;
+  const available=EV.map((_,i)=>i).filter(i=>!currentDrawn.includes(i));
+  if(!available.length)return;
+  const i=available[Math.floor(Math.random()*available.length)],chg=[];drawn.push(i);
+  const apply=state=>{const next=state||{stats:Object.fromEntries(P.map(p=>[p.id,{...BASE[P.indexOf(p)]}])),drawn:[],history:[]};if(next.drawn?.includes(i))return state;const history=next.history||[];Object.entries(EV[i].fx).forEach(([id,m])=>{const p=P.find(x=>x.id===id),changes=[];Object.entries(m).forEach(([k,d])=>{const s=next.stats?.[id]||{...BASE[P.indexOf(p)]};const before=s[k]??0,after=Math.max(0,Math.min(10,before+d)),actual=after-before;s[k]=after;(next.stats??={})[id]=s;if(actual){chg.push(`<span class="${actual>0?'up':'dn'}">${p.n}: ${k} ${actual>0?'+':''}${actual}</span>`);changes.push({stat:k,delta:actual,before,after})}});if(changes.length)history.push({province:id,changes,event:EV[i].t,card:i,at:Date.now()})});return {...next,drawn:[...(next.drawn||[]),i],history}};
+  if(sync?.ready&&sync.update){sync.update(apply).then(state=>{sync.state=state;drawn=state.drawn||[];P.forEach(p=>p.s={...(state.stats?.[p.id]||BASE[P.indexOf(p)])});saveLocalState();chgs[i]=chg.join('');route();openCard(i)}).catch(error=>{sync.status='No se pudo guardar: '+error.message;route()});return}
+  const state=apply({stats:Object.fromEntries(P.map(p=>[p.id,{...p.s}])),drawn:drawn.filter(n=>n!==i),history:window.fondosSync.state?.history||[]});drawn=state.drawn;P.forEach(p=>p.s={...state.stats[p.id]});window.fondosSync.state={...(window.fondosSync.state||{}),history:state.history};saveLocalState();chgs[i]=chg.join('');route();openCard(i);
+}
+$('#page').addEventListener('click',e=>{
+  if(e.target.closest('#draw'))draw();
+  else if(e.target.closest('#shuffle')){
+    const sync=window.fondosSync;
+    if(sync?.ready&&sync.update){sync.update(()=>({stats:Object.fromEntries(P.map((p,i)=>[p.id,{...BASE[i]}])),drawn:[],history:[]})).then(state=>{sync.state=state;drawn=[];P.forEach((p,i)=>p.s={...BASE[i]});saveLocalState();newDeck();route()}).catch(error=>{sync.status='No se pudo reiniciar: '+error.message;route()})}
+    else{newDeck();window.fondosSync.state={...(window.fondosSync.state||{}),history:[]};saveLocalState();route()}
+  }
+  else if(e.target.closest('#vote')){
+    const u=Object.values(vals).reduce((a,b)=>a+b,0);
+    if(u!==100){voteHTML=u>100?`<b class="bad">Error:</b> repartiste ${u} puntos y el máximo es 100.`:`<b class="bad">Faltan puntos:</b> te quedan ${100-u} sin repartir. Asigná los 100 antes de votar.`}
+    else{const v=P.map(p=>({p,y:vals[p.id]>=MIN[p.id]})),n=v.filter(x=>x.y).length,w=n>=4;
+      voteHTML=`<div class="px" style="font-size:13px;color:var(--${w?'gr':'rd'})">${w?'¡PROPUESTA APROBADA!':'PROPUESTA RECHAZADA'}</div><div class="eff" style="justify-content:flex-start;margin:10px 0">${v.map(x=>`<span class="${x.y?'up':'dn'}">${x.p.e} ${x.p.n}: ${x.y?'a favor':'en contra'}</span>`).join('')}</div>${n} de 6 votos a favor. ${w?'Se mantiene la unidad nacional.':'Se necesitan 4. Ajustá el reparto y hacé una segunda propuesta.'}`}
+    $('#result').innerHTML=voteHTML}
+  else if(e.target.closest('#reset')){P.forEach(p=>vals[p.id]=0);voteHTML='';route()}
+  else{const b=e.target.closest('.slot.on');if(b)openCard(+b.dataset.i)}
+});
+$('#page').addEventListener('input',e=>{if(e.target.dataset.id){vals[e.target.dataset.id]=+e.target.value;upd()}});
+$('#close').onclick=closeCard;
+$('#ov').addEventListener('click',e=>{if(e.target.id==='ov')closeCard()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCard()});
+window.addEventListener('hashchange',route);
+window.addEventListener('fondos-sync',()=>{const s=window.fondosSync;if(!s.ready)return;drawn=s.state?.drawn||[];P.forEach((p,i)=>p.s={...(s.state?.stats?.[p.id]||BASE[i])});if(s.state)saveLocalState();route()});
+window.fondosReady?.then(()=>{const s=window.fondosSync;if(s.ready){drawn=s.state?.drawn||[];P.forEach((p,i)=>p.s={...(s.state?.stats?.[p.id]||BASE[i])});route()}});
+route();
+</script>
+</body>
+</html>
