@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fondos de la Nación: el juego</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#111a3b;--panel:#1d2c5b;--ink:#f8f1cf;--dim:#a7b8d8;--cy:#61e5dc;--ye:#f5d15b;--mg:#e96ba6;--gr:#a7df67;--rd:#eb6e65;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*:before,*:after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'VT323','Courier New',monospace;font-size:22px;line-height:1.25;
+background-image:linear-gradient(rgba(97,229,220,.065) 1px,transparent 1px),linear-gradient(90deg,rgba(97,229,220,.065) 1px,transparent 1px),linear-gradient(180deg,#18264d 0%,#111a3b 52%,#111a3b 100%);background-size:32px 32px,32px 32px,100% 100%;background-attachment:fixed}
+h1,h2,h3,.px{font-family:'Press Start 2P','Courier New',monospace;font-weight:400;line-height:1.5}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:4px solid var(--ye);display:flex;gap:8px;overflow-x:auto;padding:10px 12px}
+nav a{flex:none;color:var(--ink);text-decoration:none;border:3px solid var(--dim);background:var(--panel);padding:6px 12px;font-size:20px;white-space:nowrap}
+nav a[aria-current=page]{border-color:var(--ye);background:#334777;color:var(--ye);box-shadow:3px 3px 0 #0a1129}
+nav a:focus-visible,.btn:focus-visible,.slot:focus-visible,.action-card:focus-visible,.x:focus-visible,input:focus-visible{outline:3px solid var(--cy);outline-offset:3px}
+main{max-width:760px;margin:0 auto;padding:16px}
+.hero{display:flex;align-items:center;gap:18px;margin:14px 0 22px}
+.ava{font-size:64px;width:112px;height:112px;display:grid;place-items:center;background:var(--panel);border:5px solid var(--c);box-shadow:6px 6px 0 rgba(0,0,0,.45);flex:none}
+.hero h1{font-size:clamp(16px,4.6vw,26px);color:var(--c);margin:0 0 8px;text-shadow:3px 3px 0 rgba(0,0,0,.5)}
+.cls{color:var(--dim);font-size:24px}
+.sheet{background:var(--panel);border:4px solid var(--c);box-shadow:6px 6px 0 rgba(0,0,0,.45);padding:18px}
+.stat{display:grid;grid-template-columns:120px 1fr 40px;gap:10px;align-items:center;margin:10px 0;font-size:24px}
+.track{height:22px;background:var(--bg);border:3px solid var(--dim);display:flex;gap:3px;padding:2px}
+.track i{flex:1;background:#2b2470}.track i.on{background:var(--c)}
+.stat b{font-family:'Press Start 2P',monospace;font-weight:400;font-size:13px;text-align:right}
+.stat-note{margin:10px 0 0;color:var(--dim);font-size:18px}
+h2{font-size:14px;color:var(--cy);margin:30px 0 14px}
+.btn{font-family:'Press Start 2P',monospace;font-size:12px;background:var(--ye);color:#16123a;border:0;padding:14px 18px;cursor:pointer;box-shadow:0 5px 0 #b38900}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #b38900}
+.btn[disabled]{background:#5a5290;box-shadow:0 5px 0 #3b3290;cursor:not-allowed;color:#c9c2ee}
+.btn.alt{background:var(--dim);box-shadow:0 5px 0 #6b64a0;font-size:10px}
+.deckbar{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.left{color:var(--ye)}
+.slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:18px}
+.slot{aspect-ratio:3/4;max-height:180px;background:repeating-linear-gradient(45deg,#2b2470 0 8px,#241c5c 8px 16px);border:4px solid var(--dim);color:var(--dim);display:grid;place-items:center;text-align:center;padding:8px;font:inherit;cursor:default}
+.slot.on{background:var(--panel);border-color:var(--c);color:var(--ink);cursor:pointer}
+.slot .em{font-size:34px;display:block}.slot b{font-family:'Press Start 2P',monospace;font-weight:400;font-size:8px;line-height:1.5;color:var(--c)}
+.slot.q{font-family:'Press Start 2P',monospace;font-size:26px}
+.hud{background:var(--bg);border:4px solid var(--ye);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.hud b{font-family:'Press Start 2P',monospace;font-weight:400;font-size:14px}
+.ok{color:var(--gr)}.bad{color:var(--rd)}
+.row{display:grid;grid-template-columns:170px 1fr 56px;gap:12px;align-items:center;padding:8px 0;border-bottom:2px dashed #3b3290}
+.row label{color:var(--c)}
+input[type=range]{width:100%;accent-color:var(--c);height:28px}
+.pts{text-align:right;font-family:'Press Start 2P',monospace;font-size:12px}
+.ov{position:fixed;inset:0;z-index:50;background:rgba(10,7,32,.92);display:none;align-items:center;justify-content:center;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));overflow:auto}
+.ov.show{display:flex}
+.big{position:relative;width:100%;max-width:560px;background:var(--panel);border:6px solid var(--c);box-shadow:10px 10px 0 rgba(0,0,0,.5);padding:28px 22px 24px;text-align:center;animation:fl .5s steps(5)}
+@keyframes fl{from{transform:scale(.6) rotateY(90deg)}to{transform:none}}
+@media(prefers-reduced-motion:reduce){.big{animation:none}}
+.big .em{font-size:72px;line-height:1}
+.big h2{font-size:clamp(14px,4vw,20px);color:var(--c);margin:14px 0}
+.big p{font-size:26px;margin:0 0 14px}
+.x{position:absolute;top:8px;right:8px;width:48px;height:48px;background:var(--rd);color:#fff;border:0;font-family:'Press Start 2P',monospace;font-size:18px;cursor:pointer;box-shadow:0 4px 0 #a02c2c}
+.eff{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.eff span{border:3px solid;padding:2px 8px;font-size:20px}
+.eff .up{border-color:var(--gr);color:var(--gr)}.eff .dn{border-color:var(--rd);color:var(--rd)}
+.action-hand{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}
+.action-card{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:10px;min-width:0;min-height:300px;padding:12px;background:linear-gradient(145deg,#34277c,#1d174d);color:var(--ink);border:5px ridge var(--ye);box-shadow:5px 6px 0 rgba(0,0,0,.45);text-align:left;cursor:pointer;font:inherit;transition:transform .15s,filter .15s}
+.action-card:after{content:'';position:absolute;inset:5px;border:1px solid rgba(255,255,255,.18);pointer-events:none}
+.action-card.ready:hover{transform:translateY(-5px) rotate(-1deg)}.action-card.unavailable{filter:grayscale(1);opacity:.58;cursor:not-allowed}
+.action-card .card-icon{font-size:38px;text-align:center;line-height:1.2}.action-card .card-title{font:9px/1.6 'Press Start 2P',monospace;color:var(--ye);text-align:center}.action-card .card-description{font-size:18px;line-height:1.15}.action-card .eff{margin-top:auto;gap:5px}.action-card .eff span{font-size:14px;padding:2px 4px;border-width:2px;text-align:center}.action-card .card-cost{font-size:16px;color:var(--cy);text-align:center}.action-card .card-state{font:8px/1.5 'Press Start 2P',monospace;text-align:center;color:var(--gr)}
+.action-card.back{width:min(190px,100%);min-height:260px;aspect-ratio:3/4;align-items:center;justify-content:center;text-align:center;background:repeating-linear-gradient(45deg,#2b2470 0 9px,#241c5c 9px 18px);color:var(--ye);font:48px 'Press Start 2P',monospace;cursor:default}
+.modal-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:20px}.modal-actions .btn{font-size:10px}.btn.cancel{background:var(--dim);box-shadow:0 5px 0 #6b64a0}
+.syncbox{margin:0 0 16px;padding:10px 12px;border:3px solid var(--ye);background:var(--panel);font-size:20px}
+.syncbox small{display:block;color:var(--dim);font-size:18px;margin-top:4px}
+.log{margin-top:18px;padding:12px;background:var(--bg);border:3px solid var(--dim)}.log h2{margin:0 0 8px}.log ul{margin:0;padding-left:24px}.log li{padding:4px 0}
+.event-log{margin:12px 0;padding:12px;border:3px solid var(--event-color,var(--dim));background:var(--panel)}.event-log h3{font-size:10px;color:var(--event-color,var(--cy));margin:0 0 8px}.event-log p{margin:0 0 8px}.event-log .eff{justify-content:flex-start}
+.round-panel{margin:16px 0;padding:14px;background:var(--panel);border:4px solid var(--ye);box-shadow:5px 5px 0 rgba(0,0,0,.4)}.round-head{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.round-current{font-family:'Press Start 2P',monospace;color:var(--ye);font-size:13px}.round-left{color:var(--cy);font-size:22px}.round-track{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin-top:10px}.round-track i{height:14px;background:#2b2470;border:2px solid var(--dim)}.round-track i.done{background:var(--gr);border-color:var(--gr)}
+.capital-box{margin-top:16px;padding:14px;background:var(--bg);border:4px solid var(--gr);box-shadow:5px 5px 0 rgba(0,0,0,.35)}.capital-box span{display:block;color:var(--dim);font-size:20px}.capital-box b{display:block;color:var(--gr);font-family:'Press Start 2P',monospace;font-size:clamp(14px,4vw,20px);margin-top:8px}
+.game-hud{position:sticky;top:calc(58px + env(safe-area-inset-top,0px));z-index:4;display:flex;align-items:stretch;gap:0;width:max-content;max-width:100%;margin:0 0 16px;background:#101936;border:4px solid var(--ye);box-shadow:5px 5px 0 #080e22;font-family:'Press Start 2P',monospace}
+.game-hud-round,.game-hud-money{display:flex;align-items:center;gap:10px;padding:9px 12px}.game-hud-round{position:relative;justify-content:center;min-width:150px;min-height:112px;padding-top:17px;border-right:3px solid #52658d}.game-hud-round:before,.game-hud-round:after{content:'';position:absolute;top:0;width:9px;height:34px;background:repeating-linear-gradient(0deg,#211711 0 5px,#765139 5px 9px);border:2px solid #17100d;box-shadow:2px 2px 0 rgba(0,0,0,.5);z-index:0}.game-hud-round:before{left:29%}.game-hud-round:after{right:29%}
+.round-sign{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:126px;min-height:91px;padding:8px 10px 6px;color:#17100d;border:5px solid #21130f;clip-path:polygon(7% 0,93% 0,93% 5%,100% 5%,100% 95%,93% 95%,93% 100%,7% 100%,7% 95%,0 95%,0 5%,7% 5%);background-color:#c88e60;background-image:repeating-linear-gradient(0deg,transparent 0 10px,rgba(112,61,39,.12) 10px 13px,transparent 13px 19px),linear-gradient(90deg,rgba(111,61,43,.2),transparent 17% 83%,rgba(111,61,43,.2));filter:drop-shadow(4px 5px 0 #080a12);image-rendering:pixelated}
+.round-sign-name{font-size:9px;letter-spacing:1px;color:#e62222;text-shadow:2px 2px 0 #160907,-1px -1px 0 #160907}.round-sign-number{font-size:34px;line-height:1.05;color:#fff;text-shadow:3px 3px 0 #17100d,-2px 2px 0 #17100d,2px -2px 0 #17100d,-2px -2px 0 #17100d}.round-sign-total{font-size:7px;color:#40271a;text-shadow:1px 1px 0 rgba(255,224,180,.7)}
+.game-hud-money{min-width:158px}.game-hud-money>div{display:flex;flex-direction:column;gap:6px}.game-hud-label{font-size:8px;color:var(--dim)}.game-hud-money b{font-size:11px;line-height:1.5;color:var(--ye)}.game-hud-money img{width:30px;height:30px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(2px 2px 0 #070d1b)}
+nav{background:#101936;border-bottom-color:var(--ye);box-shadow:0 4px 0 rgba(5,10,25,.8)}
+.sheet,.log,.round-panel,.event-log{box-shadow:5px 5px 0 #080e22}
+@media(max-width:520px){.game-hud{top:calc(54px + env(safe-area-inset-top,0px))}.game-hud-round{min-width:132px;min-height:100px;padding:12px 6px 7px}.round-sign{width:112px;min-height:82px}.round-sign-number{font-size:29px}.game-hud-money{min-width:138px;gap:7px;padding:8px}.game-hud-money b{font-size:9px}.game-hud-money img{width:26px;height:26px}}
+@media(max-width:620px){.action-hand{grid-template-columns:repeat(2,minmax(0,1fr))}.action-card{min-height:280px}}
+@media(max-width:520px){.stat{grid-template-columns:96px 1fr 34px}.row{grid-template-columns:1fr 56px}.row input{grid-column:1/-1;grid-row:2}.ava{width:84px;height:84px;font-size:46px}}
+</style>
+</head>
+<body>
+<main id="page"></main>
+
+<script>
+// Keep the local page renderable even when the Firebase browser module is blocked by file://.
+window.fondosSync = window.fondosSync || {ready:false, room:new URLSearchParams(location.search).get('sala') || 'aula', state:null, status:'Sin conexión al servidor · modo local'};
+</script>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
+import { getDatabase, ref, onValue, runTransaction, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB9DFNwVrGh236MdOF9zxcXP8ZEJhh7tuk",
+  authDomain: "proyecto-naciones.firebaseapp.com",
+  databaseURL: "https://proyecto-naciones-default-rtdb.firebaseio.com",
+  projectId: "proyecto-naciones",
+  storageBucket: "proyecto-naciones.firebasestorage.app",
+  messagingSenderId: "862886174294",
+  appId: "1:862886174294:web:12a26518a74da2b3faa5f7",
+  measurementId: "G-925FKZ0MCW"
+};
+window.fondosSync = window.fondosSync || {ready:false, room:new URLSearchParams(location.search).get('sala') || 'aula', state:null, status:'Configuración de sincronización pendiente'};
+window.fondosReady = (async()=>{
+  if(!firebaseConfig?.apiKey || !firebaseConfig?.databaseURL) return;
+  try {
+    const app=initializeApp(firebaseConfig), db=getDatabase(app), roomRef=ref(db,'salas/'+window.fondosSync.room);
+    window.fondosSync.update=async updater=>{const result=await runTransaction(roomRef,current=>updater(current||null));return result.snapshot.val()};
+    window.fondosSync.timestamp=serverTimestamp;
+    onValue(roomRef,snapshot=>{window.fondosSync.state=snapshot.val();window.fondosSync.ready=true;window.fondosSync.status='Conectado · sala '+window.fondosSync.room;if(!snapshot.exists())window.fondosSync.update(current=>current||{stats:{},drawn:[],history:[]}).catch(error=>{window.fondosSync.status='No se pudo iniciar la sala: '+error.message;window.dispatchEvent(new Event('fondos-sync'))});window.dispatchEvent(new Event('fondos-sync'))},error=>{window.fondosSync.status='Error de conexión: '+error.message;window.dispatchEvent(new Event('fondos-sync'))});
+  } catch(error) { window.fondosSync.status='Error de conexión: '+error.message;window.dispatchEvent(new Event('fondos-sync')) }
+})();
+</script>
+
+<div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="otitle">
+  <div class="big" id="big">
+    <button class="x" type="button" id="close" aria-label="Cerrar noticia">X</button>
+    <div class="em" id="oem"></div><h2 id="otitle"></h2><p id="odesc"></p><div class="eff" id="oeff"></div><button class="btn" type="button" id="continue-news" style="display:none;margin-top:18px">Ver noticia</button><div class="modal-actions" id="action-confirm-buttons" style="display:none"><button class="btn" type="button" id="confirm-action">Sí, usar carta</button><button class="btn cancel" type="button" id="cancel-action">Cancelar</button></div>
+  </div>
+</div>
+
+<script>
+const P=[
+{id:'ba',n:'Buenos Aires',e:'🏙️',c:'#ff4fa3',cls:'Tanque urbano',max:30,s:{Población:10,Economía:10,Necesidad:8,Infraestructura:6,Recursos:8,'Influencia política':10,Gestión:5}},
+{id:'co',n:'Córdoba',e:'🚧',c:'#38f0ff',cls:'Mago logístico',max:40,s:{Población:8,Economía:8,Necesidad:5,Infraestructura:7,Recursos:6,'Influencia política':7,Gestión:8}},
+{id:'me',n:'Mendoza',e:'🍇',c:'#b57bff',cls:'Arquero del agua',max:40,s:{Población:6,Economía:7,Necesidad:5,Infraestructura:6,Recursos:8,'Influencia política':6,Gestión:7}},
+{id:'sa',n:'Salta',e:'⛰️',c:'#ffd23f',cls:'Explorador del norte',max:40,s:{Población:6,Economía:5,Necesidad:8,Infraestructura:5,Recursos:8,'Influencia política':5,Gestión:6}},
+{id:'mi',n:'Misiones',e:'🌿',c:'#5dff8a',cls:'Guardabosques',max:40,s:{Población:6,Economía:6,Necesidad:7,Infraestructura:5,Recursos:7,'Influencia política':5,Gestión:6}},
+{id:'tf',n:'Tierra del Fuego',e:'❄️',c:'#7fb4ff',cls:'Centinela austral',max:40,s:{Población:2,Economía:6,Necesidad:6,Infraestructura:5,Recursos:7,'Influencia política':4,Gestión:6}}
+];
+const EV=[
+{t:'Sequía histórica',e:'☀️',c:'#ffb347',d:'No llueve hace meses y el sector agrario cae un 80%. Faltan ingresos y crece la ayuda que necesitan los productores.',fx:{co:{Economía:-3},me:{Economía:-2},sa:{Economía:-1}}},
+{t:'Temporada récord en las Cataratas',e:'🌈',c:'#5dff8a',d:'El turismo en Iguazú sube un 60% y llegan visitantes de todo el mundo. Hay más ingresos, pero también más presión sobre el ambiente.',fx:{mi:{Recursos:1,Economía:2}}},
+{t:'Se hunde la industria electrónica',e:'📉',c:'#ff5a5a',d:'Bajan los subsidios y las ventas de electrónica caen un 60%. Peligran los empleos en la isla.',fx:{tf:{Infraestructura:-3,Economía:-2}}},
+{t:'Colapso del transporte en el AMBA',e:'🚆',c:'#ff4fa3',d:'Un paro y fallas de infraestructura frenan trenes y colectivos durante semanas. Millones de personas no llegan a trabajar.',fx:{ba:{Economía:-1,Infraestructura:-1}}},
+{t:'Inundaciones en el norte',e:'🌊',c:'#38f0ff',d:'Las lluvias cortan caminos rurales y aíslan comunidades. El turismo se frena y hacen falta obras urgentes.',fx:{sa:{Recursos:-2},mi:{Recursos:-2}}},
+{t:'Plan de rutas federales',e:'🛣️',c:'#ffd23f',d:'Comienza un plan de obras para conectar regiones y facilitar el transporte de bienes y personas.',fx:{co:{Infraestructura:2,Gestión:1},sa:{Infraestructura:1}}},
+{t:'Boom del litio',e:'🔋',c:'#b57bff',d:'La demanda internacional de litio impulsa inversiones y exportaciones en el norte, aunque también crece la presión sobre los recursos.',fx:{sa:{Economía:2,Recursos:-1},me:{Economía:1}}},
+{t:'Incendios en la selva',e:'🔥',c:'#ff5a5a',d:'Una ola de calor y los focos de incendio afectan áreas naturales y comunidades. Se necesitan recursos para responder.',fx:{mi:{Recursos:-2,Gestión:-1}}},
+{t:'Vendimia de exportación',e:'🍷',c:'#ff4fa3',d:'Una cosecha de gran calidad abre nuevos mercados para el vino y genera ingresos en la región.',fx:{me:{Economía:2,Recursos:1},ba:{Economía:1}}},
+{t:'Parque eólico austral',e:'🌬️',c:'#7fb4ff',d:'Se inaugura un parque eólico en el sur. Aumenta la energía disponible y se crean oportunidades de empleo local.',fx:{tf:{Infraestructura:2,Recursos:1,Economía:1}}}
+];
+const ACTION_CARDS=[
+{id:'infra',e:'🧱',t:'Inversión en infraestructura',d:'Usa capital para construir y mejorar caminos y servicios.',fx:{Economía:-2,Infraestructura:4}},
+{id:'tecnificacion',e:'🧑‍🏫',t:'Capacitación técnica',d:'Dedica capacidad de gestión para mejorar infraestructura.',fx:{Gestión:-2,Infraestructura:2}},
+{id:'exportaciones',e:'📦',t:'Impulso exportador',d:'Usa recursos provinciales para aumentar la actividad económica.',fx:{Recursos:-2,Economía:1}},
+{id:'reconversion',e:'⚙️',t:'Reconversión productiva',d:'Reasigna infraestructura para fortalecer los recursos disponibles.',fx:{Infraestructura:-2,Recursos:2}},
+{id:'empleo',e:'👷',t:'Plan de empleo',d:'Invierte capacidad de gestión para activar la economía local.',fx:{Gestión:-2,Economía:1}}
+];
+function dealActionHands(){return Object.fromEntries(P.map(p=>{const ids=ACTION_CARDS.map(card=>card.id);for(let i=ids.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]]}return [p.id,ids.slice(0,4)]}))}
+const TOPICS=[
+{t:'Producción agrícola',e:'🌾',d:'En esta ronda se reparte el presupuesto para apoyar la producción agrícola, el trabajo rural y las economías regionales.'},
+{t:'Turismo y conservación',e:'🌿',d:'En esta ronda se decide cuánto invertir en turismo, cuidado de áreas naturales y desarrollo local sostenible.'},
+{t:'Industria y empleo',e:'🏭',d:'En esta ronda el presupuesto busca sostener la industria, proteger empleos y mejorar la capacidad productiva.'},
+{t:'Transporte e infraestructura',e:'🛣️',d:'En esta ronda se priorizan rutas, transporte y obras que conectan a las comunidades.'},
+{t:'Desarrollo del norte',e:'🧭',d:'En esta ronda el dinero se distribuye para atender necesidades y oportunidades de las provincias del norte.'},
+{t:'Conectividad federal',e:'🚧',d:'En esta ronda se busca reducir distancias con infraestructura y mejores conexiones entre provincias.'},
+{t:'Energía y minería responsable',e:'🔋',d:'En esta ronda se ponderan la producción de energía, los recursos naturales y el cuidado de las comunidades.'},
+{t:'Protección ambiental',e:'🌳',d:'En esta ronda se asignan fondos para prevenir daños ambientales y responder ante emergencias.'},
+{t:'Exportaciones regionales',e:'🍇',d:'En esta ronda se considera cómo impulsar la producción regional y abrir mercados para sus productos.'},
+{t:'Energía y desarrollo austral',e:'🌬️',d:'En esta ronda se priorizan oportunidades, servicios e infraestructura para el desarrollo del sur.'}
+];
+const SL={ba:'buenosaires',co:'cordoba',me:'mendoza',sa:'salta',mi:'misiones',tf:'tierradelfuego'};
+const BUDGET_STEP=2500,BUDGET_UNITS=40,BUDGET_TOTAL=BUDGET_STEP*BUDGET_UNITS;
+const money=n=>'US$ '+new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(n);
+let voteHTML='';
+const $=s=>document.querySelector(s);
+const STAT_ORDER=['Población','Economía','Infraestructura','Recursos','Influencia política','Gestión','Necesidad'];
+function deriveNeed(stats){const sum=STAT_ORDER.slice(0,-1).reduce((total,key)=>total+(Number(stats[key])||0),0);return Math.max(0,Math.min(10,Math.floor((60-sum)/6)))}
+const formatStat=value=>String(value);
+function statBar(value){return Array.from({length:10},(_,i)=>`<i class="${i<value?'on':''}"></i>`).join('')}
+function recordNeedChange(id,stats,changes,display){const before=Number(stats.Necesidad)||0,after=deriveNeed(stats);stats.Necesidad=after;if(after!==before){const delta=after-before;changes.push({stat:'Necesidad',delta,before,after});if(display)display.push(`<span class="${delta>0?'up':'dn'}">${P.find(p=>p.id===id)?.n||id}: Necesidad informativa ${delta>0?'+':''}${formatStat(delta)}</span>`)}}
+function previewCardEffects(province,card,state){const before={...province.s},after={...province.s},capital=state.capitals?.[province.id]??BASE_CAPITALS[province.id];let nextCapital=capital;Object.entries(card.fx).forEach(([stat,delta])=>{if(stat==='Necesidad')return;if(stat==='Economía'){nextCapital=Math.max(0,nextCapital+delta*ECONOMY_POINT_VALUE);after[stat]=Math.floor(nextCapital/ECONOMY_POINT_VALUE)}else after[stat]=Math.max(0,(before[stat]||0)+delta)});after.Necesidad=deriveNeed(after);const effects=Object.keys(card.fx).filter(stat=>stat!=='Necesidad').map(stat=>[stat,before[stat]||0,after[stat]||0]);if(after.Necesidad!==before.Necesidad)effects.push(['Necesidad informativa',before.Necesidad,after.Necesidad]);return effects.map(([stat,oldValue,newValue])=>{const delta=newValue-oldValue;return `<span class="${delta>=0?'up':'dn'}">${stat}: ${delta>0?'+':''}${formatStat(delta)} (${formatStat(oldValue)} → ${formatStat(newValue)})</span>`}).join('')}
+const BASE=P.map(p=>Object.fromEntries(STAT_ORDER.map(stat=>[stat,stat==='Necesidad'?deriveNeed(p.s):p.s[stat]])));
+const economies=BASE.map(s=>s.Economía),minEconomy=Math.min(...economies),maxEconomy=Math.max(...economies);
+const ECONOMY_POINT_VALUE=12500,CAPITAL_VERSION=3,NEED_VERSION=2;
+const BASE_CAPITALS=Object.fromEntries(P.map((p,i)=>[p.id,BASE[i].Economía*ECONOMY_POINT_VALUE]));
+const vals=Object.fromEntries(P.map(p=>[p.id,0]));
+let deck=[],drawn=[],chgs={};
+const LOCAL_KEY='fondos-nacion-estado-v1';
+function migrateState(state){
+  const next=state||{},stats={...Object.fromEntries(P.map((p,i)=>[p.id,{...BASE[i]}])),...(next.stats||{})};
+  let capitals={...BASE_CAPITALS,...(next.capitals||{})},capitalHistory=next.capitalHistory||[];
+  if(next.capitalVersion!==CAPITAL_VERSION){
+    capitals={...BASE_CAPITALS};capitalHistory=[];
+    Object.entries(next.allocations||{}).forEach(([round,allocation])=>P.forEach(p=>{const amount=Number(allocation?.[p.id])||0;if(next.confirmedRounds?.[round]&&amount){capitals[p.id]+=amount;capitalHistory.push({province:p.id,round:+round,amount,at:Date.now(),kind:'reparto'})}}));
+    P.forEach((p,i)=>{const previousEconomy=Number(next.stats?.[p.id]?.Economía);if(Number.isFinite(previousEconomy)&&previousEconomy!==BASE[i].Economía){const amount=(previousEconomy-BASE[i].Economía)*ECONOMY_POINT_VALUE;capitals[p.id]=Math.max(0,capitals[p.id]+amount);capitalHistory.push({province:p.id,round:next.round||0,amount,at:Date.now(),kind:'migracion'})}});
+  }
+  P.forEach(p=>{stats[p.id]={...BASE[P.findIndex(x=>x.id===p.id)],...(stats[p.id]||{})};stats[p.id].Economía=Math.floor((Number(capitals[p.id])||0)/ECONOMY_POINT_VALUE);stats[p.id].Necesidad=deriveNeed(stats[p.id])});
+  const actionUses={...(next.actionUses||{})},cleanHistory=entries=>(entries||[]).map(entry=>({...entry,changes:(entry.changes||[]).filter(change=>next.needVersion===NEED_VERSION||change.stat!=='Necesidad')})),history=cleanHistory(next.history),actionHistory=cleanHistory(next.actionHistory);
+  (next.investmentHistory||[]).forEach(entry=>{if(entry.province&&entry.round&&!actionUses[entry.province]?.[entry.round])actionUses[entry.province]={...(actionUses[entry.province]||{}),[entry.round]:'infra'}});
+  return {...next,capitalVersion:CAPITAL_VERSION,needVersion:NEED_VERSION,stats,capitals,capitalHistory,history,actionUses,actionHistory,actionHands:next.actionHands||{},investmentUsed:next.investmentUsed||{},investmentHistory:next.investmentHistory||[]};
+}
+function ensureCurrentActionHands(raw){const state=migrateState(raw||{}),round=Math.min(state.round??state.drawn?.length??0,10);if(!round||state.actionHands?.[round])return state;return {...state,actionHands:{...state.actionHands,[round]:dealActionHands()}}}
+function saveLocalState(){const state=migrateState(window.fondosSync.state||{});window.fondosSync.state=state;P.forEach(p=>p.s={...state.stats[p.id]});localStorage.setItem(LOCAL_KEY,JSON.stringify({...state,drawn:state.drawn||drawn,round:Math.min(state.round??drawn.length,10),ended:!!state.ended}))}
+function loadLocalState(){try{const saved=JSON.parse(localStorage.getItem(LOCAL_KEY)||'null');if(saved){const migrated=migrateState(saved);drawn=migrated.drawn||[];P.forEach(p=>p.s={...migrated.stats[p.id]});window.fondosSync.state={...(window.fondosSync.state||{}),...migrated,round:saved.round||0,ended:!!saved.ended,history:saved.history||[],allocations:saved.allocations||{},confirmedRounds:saved.confirmedRounds||{}}}}catch(error){console.warn('No se pudo leer el estado local',error)}}
+function newDeck(){deck=EV.map((_,i)=>i).sort(()=>Math.random()-.5);drawn=[];chgs={};P.forEach((p,i)=>p.s={...BASE[i]})}
+newDeck();
+loadLocalState();
+window.fondosSync.state=ensureCurrentActionHands(window.fondosSync.state||{});P.forEach(p=>p.s={...window.fondosSync.state.stats[p.id]});
+
+function gameHud(round,amount,ended=false,moneyLabel='DISPONIBLE'){
+  const completed=Math.max(0,Math.min(round,10));
+  return `<section class="game-hud" aria-label="Ronda ${completed} de 10. ${moneyLabel}: ${money(amount)}"><div class="game-hud-round"><div class="round-sign"><span class="round-sign-name">ROUND</span><b class="round-sign-number">${completed}</b><span class="round-sign-total">OF 10</span></div></div><div class="game-hud-money"><img src="assets/money.png" alt=""><div><span class="game-hud-label">${moneyLabel}</span><b id="hud-money">${money(amount)}</b></div></div></section>`;
+}
+
+function provincePage(p){
+  const roundDrawn=window.fondosSync.state?.drawn||drawn;
+  const currentRound=Math.min(window.fondosSync.state?.round??roundDrawn.length,10),ended=!!window.fondosSync.state?.ended;
+  const state=window.fondosSync.state||{},usedCard=state.actionUses?.[p.id]?.[currentRound],capital=state.capitals?.[p.id]??BASE_CAPITALS[p.id];
+  const preview=card=>previewCardEffects(p,card,state);
+  const canUse=card=>!ended&&currentRound>0&&!usedCard&&Object.entries(card.fx).every(([stat,delta])=>delta>=0||(stat==='Economía'?capital>=-delta*ECONOMY_POINT_VALUE:(p.s[stat]||0)>=-delta));
+  const disabledReason=card=>ended?'La partida terminó':currentRound===0?'Empezá la partida para usar las cartas':usedCard?`Ya usaste «${ACTION_CARDS.find(x=>x.id===usedCard)?.t||'una carta'}» en esta ronda`:'No alcanza la estadística requerida';
+  const handIds=state.actionHands?.[currentRound]?.[p.id]||[],actions=currentRound===0?'<div class="action-card back" aria-label="La partida todavía no comenzó">?</div>':handIds.map(id=>ACTION_CARDS.find(card=>card.id===id)).filter(Boolean).map(card=>{const usable=canUse(card);return `<button class="action-card ${usable?'ready':'unavailable'}" type="button" data-action="${card.id}" data-province="${p.id}" ${usable?'':'disabled'} aria-label="${card.t}. ${usable?'Disponible para usar.':disabledReason(card)}"><span class="card-icon">${card.e}</span><span class="card-title">${card.t}</span><span class="card-description">${card.d}</span><span class="eff">${preview(card)}</span>${card.fx.Economía<0?`<span class="card-cost">Costo: ${money(-card.fx.Economía*ECONOMY_POINT_VALUE)}</span>`:''}<span class="card-state">${usable?'TOCÁ PARA USAR':disabledReason(card).toUpperCase()}</span></button>`}).join('');
+  return `${gameHud(currentRound,state.capitals?.[p.id]??BASE_CAPITALS[p.id],ended,'CAPITAL')}<div class="hero" style="--c:${p.c}"><div class="ava">${p.e}</div><div><h1>${p.n}</h1><div class="cls">Clase: ${p.cls}</div></div></div>
+  <div class="syncbox" id="sync-status"></div><section class="sheet" style="--c:${p.c}" aria-label="Estadísticas de ${p.n}">${STAT_ORDER.map(k=>{const v=p.s[k]??0;return `<div class="stat"><span>${k}</span><div class="track" aria-hidden="true">${statBar(v)}</div><b>${formatStat(v)}</b></div>`}).join('')}<p class="stat-note">Necesidad es informativa: aumenta 1 por cada 6 puntos que falten para que las otras estadísticas sumen 60.</p></section>
+  ${currentRound===0?`<section class="action-hand" aria-label="Carta oculta">${actions}</section>`:`<section class="log"><h2>Cartas de acción · Ronda ${currentRound}</h2><p>Estas cuatro cartas se sortearon para ${p.n}. Podés usar una por ronda.</p><div class="action-hand">${actions||'<div class="action-card back" aria-label="Preparando las cartas">?</div>'}</div></section>`}
+  <section class="log"><h2>Cartas de acción utilizadas</h2>${(state.actionHistory||[]).filter(x=>x.province===p.id).slice().reverse().map(x=>`<article class="event-log" style="--event-color:${p.c}"><h3>Ronda ${x.round}: ${x.cardName}</h3><div class="eff">${(x.changes||[]).map(change=>`<span class="${change.delta>0?'up':'dn'}">${change.stat}: ${change.delta>0?'+':''}${formatStat(change.delta)} (${formatStat(change.before)} → ${formatStat(change.after)})</span>`).join('')}</div></article>`).join('')||'<p>Todavía no se usaron cartas de acción.</p>'}</section>
+  <section class="log"><h2>Noticias que afectaron a ${p.n}</h2>${(window.fondosSync.state?.history||[]).filter(x=>x.province===p.id).slice().reverse().map(x=>{const ev=EV[x.card];return ev?`<article class="event-log" style="--event-color:${ev.c}"><h3>${ev.e} ${ev.t}</h3><p>${ev.d}</p><div class="eff">${x.changes.map(change=>`<span class="${change.delta>0?'up':'dn'}">${change.stat}: ${change.delta>0?'+':''}${formatStat(change.delta)} (${formatStat(change.before)} → ${formatStat(change.after)})</span>`).join('')}</div></article>`:''}).join('')||'<p>Todavía no salió ninguna noticia que haya modificado las estadísticas de esta provincia.</p>'}</section>`;
+}
+function gamePage(){
+  const sharedDrawn=window.fondosSync.ready&&window.fondosSync.state?.drawn?window.fondosSync.state.drawn:drawn;
+  const remaining=EV.map((_,i)=>i).filter(i=>!sharedDrawn.includes(i));
+  const currentRound=Math.min(window.fondosSync.state?.round??sharedDrawn.length,10),ended=!!window.fondosSync.state?.ended,confirmed=!!window.fondosSync.state?.confirmedRounds?.[currentRound],freeMoney=(BUDGET_UNITS-Object.values(vals).reduce((sum,value)=>sum+value,0))*BUDGET_STEP;
+  const canAdvance=remaining.length&&!ended&&(currentRound===0||confirmed),topic=TOPICS[Math.max(0,currentRound-1)];
+  return `${gameHud(currentRound,freeMoney,ended,'PRESUPUESTO LIBRE')}<div class="syncbox" id="sync-status"></div>${currentRound===10&&!ended?'<div class="round-left" style="margin-top:8px">Llegaste a la ronda 10. La partida sigue abierta hasta que pulses Terminar.</div>':''}<section class="event-log" style="--event-color:var(--cy)"><h3>${topic.e} ${currentRound===0?'PRÓXIMO TEMA':'TEMA DE LA RONDA '+currentRound+': '+topic.t}</h3><p>${currentRound===0?`La primera ronda tratará sobre ${topic.t.toLowerCase()}. ${topic.d}`:topic.d}</p></section><h2>Noticias de la partida</h2>
+  <div class="deckbar"><button class="btn" type="button" id="next-round" ${canAdvance?'':'disabled'}>➡️ Siguiente ronda</button>
+  ${ended?'<button class="btn alt" type="button" id="shuffle">Nueva partida</button>':''}
+  <span class="left">Quedan ${remaining.length} noticias por descubrir</span></div>
+  <div class="slots" id="slots">${EV.map((ev,i)=>sharedDrawn.includes(i)?`<button class="slot on" style="--c:${ev.c}" data-i="${i}" type="button"><span><span class="em">📰</span><b>${ev.t}</b></span></button>`:`<div class="slot q" aria-label="Noticia todavía no revelada">📰</div>`).join('')}</div>
+  <h2>Presupuesto para ${topic.t}: ${money(BUDGET_TOTAL)}</h2>
+  <div class="hud"><span>Repartido: <b id="used"></b></span><span>Disponible: <b id="free"></b></span></div>
+  <div id="rows">${P.map(p=>`<div class="row" style="--c:${p.c}"><label for="r-${p.id}">${p.e} ${p.n}</label><input type="range" id="r-${p.id}" min="0" max="${BUDGET_UNITS}" step="1" value="${vals[p.id]}" data-id="${p.id}" ${currentRound===0||ended||confirmed?'disabled':''}><div class="pts" id="v-${p.id}">${money(vals[p.id]*BUDGET_STEP)}</div></div>`).join('')}</div>
+  <div style="margin-top:18px;display:flex;gap:12px;flex-wrap:wrap"><button class="btn" type="button" id="vote" ${currentRound===0||ended||confirmed?'disabled':''}>${confirmed?'Reparto confirmado':'Confirmar reparto'}</button><button class="btn alt" type="button" id="finish" ${ended?'disabled':''}>${ended?'Partida terminada':'⏹ Terminar partida'}</button></div>
+  <div class="hud" id="result" style="margin-top:16px;display:block" aria-live="polite">${voteHTML|| (currentRound===0?'La partida todavía no comenzó. Pulsa Siguiente ronda para ver el tema y la primera noticia.':confirmed?'El reparto está confirmado. Ya podés pasar a la siguiente ronda.':'Distribuí los US$ 100.000. Los controles avanzan de US$ 2.500 en US$ 2.500.')}</div>`;
+}
+let observedBudgetRound=null,observedBudgetConfirmation=null;
+function syncBudgetRound(){
+  const state=window.fondosSync.state||{},round=Math.min(state.round??drawn.length,10),confirmed=!!state.confirmedRounds?.[round];
+  if(round!==observedBudgetRound||confirmed!==observedBudgetConfirmation){const allocation=confirmed?state.allocations?.[round]:null;P.forEach(p=>vals[p.id]=allocation?Math.round((allocation[p.id]||0)/BUDGET_STEP):0);observedBudgetRound=round;observedBudgetConfirmation=confirmed}
+}
+function upd(){
+  const u=Object.values(vals).reduce((a,b)=>a+b,0),free=BUDGET_UNITS-u;
+  if($('#hud-money'))$('#hud-money').textContent=money(free*BUDGET_STEP);
+  $('#used').textContent=money(u*BUDGET_STEP);$('#used').className=u===BUDGET_UNITS?'ok':'';
+  $('#free').textContent=money(free*BUDGET_STEP);$('#free').className=free===0?'ok':'';
+  P.forEach(p=>{const slider=$('#r-'+p.id);$('#v-'+p.id).textContent=money(vals[p.id]*BUDGET_STEP);slider.value=vals[p.id]});
+  const state=window.fondosSync.state||{},round=Math.min(state.round??drawn.length,10);
+  $('#vote').disabled=u!==BUDGET_UNITS||round===0||!!state.ended||!!state.confirmedRounds?.[round];
+}
+function route(){
+  syncBudgetRound();
+  const h=location.hash.slice(1),p=P.find(x=>SL[x.id]===h);
+  if(p)$('#page').innerHTML=provincePage(p);
+  else if(h==='votacion'){$('#page').innerHTML=gamePage();upd()}
+  else $('#page').innerHTML=`<section class="sheet" style="--c:var(--ye)"><h1 style="color:var(--ye);font-size:18px;margin:0 0 12px">FONDOS DE LA NACIÓN</h1><p style="margin:0 0 10px">Esta página tiene 7 secciones separadas. Cada una se abre agregando su nombre después del # en la dirección:</p><p style="margin:0;color:var(--cy)">#buenosaires<br>#cordoba<br>#mendoza<br>#salta<br>#misiones<br>#tierradelfuego<br>#votacion</p></section>`;
+  window.scrollTo(0,0);
+  const box=$('#sync-status');if(box)box.innerHTML=`${window.fondosSync?.status||'Preparando conexión…'}<small>Para compartir el estado, todos deben usar el mismo enlace y código de sala.</small>`;
+}
+function openCard(i){
+  const ev=EV[i];
+  pendingAction=null;$('#continue-news').style.display='none';$('#action-confirm-buttons').style.display='none';
+  $('#big').style.setProperty('--c',ev.c);
+  $('#oem').textContent=ev.e;$('#otitle').textContent=ev.t;$('#odesc').textContent=ev.d;
+  $('#oeff').innerHTML=chgs[i]||'';
+  $('#ov').classList.add('show');$('#close').focus();
+}
+let pendingNews=null,pendingAction=null;
+function openRoundIntro(round,i){
+  const topic=TOPICS[round-1];pendingNews=i;
+  pendingAction=null;$('#action-confirm-buttons').style.display='none';
+  $('#big').style.setProperty('--c','#38f0ff');$('#oem').textContent=topic.e;
+  $('#otitle').textContent=`Ronda ${round}: ${topic.t}`;$('#odesc').textContent=topic.d;
+  $('#oeff').innerHTML='';$('#continue-news').style.display='inline-block';
+  $('#ov').classList.add('show');$('#continue-news').focus();
+}
+$('#continue-news').onclick=()=>{if(pendingNews!==null)openCard(pendingNews)};
+function openActionConfirm(provinceId,cardId){
+  const p=P.find(province=>province.id===provinceId),card=ACTION_CARDS.find(item=>item.id===cardId),state=window.fondosSync.state||{};
+  if(!p||!card)return;
+  pendingAction={provinceId,cardId,round:Math.min(state.round??drawn.length,10)};
+  const capital=state.capitals?.[provinceId]??BASE_CAPITALS[provinceId];
+  $('#big').style.setProperty('--c',p.c);$('#oem').textContent=card.e;$('#otitle').textContent=card.t;
+  $('#odesc').textContent=`${card.d} ¿Confirmás que querés usarla? Solo podés usar una carta en esta ronda.`;
+  $('#oeff').innerHTML=previewCardEffects(p,card,state);
+  $('#continue-news').style.display='none';$('#action-confirm-buttons').style.display='flex';$('#ov').classList.add('show');$('#confirm-action').focus();
+}
+function playAction(selection){
+  const {provinceId:id,cardId,round}=selection,card=ACTION_CARDS.find(item=>item.id===cardId),sync=window.fondosSync;if(!card)return;
+  const useAction=raw=>{const current=migrateState(raw||{}),capital=current.capitals?.[id]??BASE_CAPITALS[id],stats={...current.stats,[id]:{...current.stats?.[id]}},changes=[];if(current.ended||round===0||current.round!==round||current.actionUses?.[id]?.[round]||!current.actionHands?.[round]?.[id]?.includes(cardId))return raw;
+    if(Object.entries(card.fx).some(([stat,delta])=>delta<0&&(stat==='Economía'?capital<(-delta*ECONOMY_POINT_VALUE):(stats[id][stat]||0)<-delta)))return raw;
+    let nextCapital=capital;
+    Object.entries(card.fx).forEach(([stat,delta])=>{if(stat==='Necesidad')return;const before=stats[id][stat]||0;let after;if(stat==='Economía'){nextCapital=Math.max(0,nextCapital+delta*ECONOMY_POINT_VALUE);after=Math.floor(nextCapital/ECONOMY_POINT_VALUE)}else after=Math.max(0,before+delta);stats[id][stat]=after;const actual=after-before;if(actual)changes.push({stat,delta:actual,before,after})});recordNeedChange(id,stats[id],changes);
+    return {...current,stats,capitals:{...current.capitals,[id]:nextCapital},capitalHistory:nextCapital!==capital?[...current.capitalHistory,{province:id,round,amount:nextCapital-capital,at:Date.now(),kind:'accion',card:card.id}]:current.capitalHistory,actionUses:{...(current.actionUses||{}),[id]:{...(current.actionUses?.[id]||{}),[round]:card.id}},actionHistory:[...(current.actionHistory||[]),{province:id,round,card:card.id,cardName:card.t,changes,at:Date.now()}]};
+  };
+  const done=state=>{sync.state=state;drawn=state?.drawn||drawn;if(state?.stats)P.forEach(p=>p.s={...state.stats[p.id]});saveLocalState();route()};
+  if(sync.ready&&sync.update)sync.update(useAction).then(done).catch(error=>{sync.status='No se pudo guardar la carta: '+error.message;route()});else done(useAction(sync.state||{}));
+}
+$('#confirm-action').onclick=()=>{const selection=pendingAction;if(!selection)return;closeCard();playAction(selection)};
+$('#cancel-action').onclick=closeCard;
+function closeCard(){pendingAction=null;$('#action-confirm-buttons').style.display='none';$('#ov').classList.remove('show')}
+function draw(){
+  const sync=window.fondosSync;
+  const currentDrawn=sync?.ready?(sync.state?.drawn||[]):drawn;
+  const currentRound=Math.min(sync?.state?.round??currentDrawn.length,10);
+  if(sync?.state?.ended||(currentRound>0&&!sync?.state?.confirmedRounds?.[currentRound]))return;
+  const available=EV.map((_,i)=>i).filter(i=>!currentDrawn.includes(i));
+  if(!available.length)return;
+  const i=currentRound,chg=[];
+  const apply=state=>{const next=migrateState(state||{stats:Object.fromEntries(P.map((p,i)=>[p.id,{...BASE[i]}])),drawn:[],history:[],round:0});if(next.drawn?.includes(i))return state;const round=Math.min(next.round??(next.drawn||[]).length,10);if(round>0&&!next.confirmedRounds?.[round])return undefined;const history=next.history||[],capitals={...BASE_CAPITALS,...next.capitals},capitalHistory=[...(next.capitalHistory||[])];Object.entries(EV[i].fx).forEach(([id,m])=>{const p=P.find(x=>x.id===id),changes=[];Object.entries(m).forEach(([k,d])=>{if(k==='Necesidad')return;const s=next.stats?.[id]||{...BASE[P.indexOf(p)]};const before=s[k]??0;let after,actual;if(k==='Economía'){const oldCapital=capitals[id]??BASE_CAPITALS[id];capitals[id]=Math.max(0,oldCapital+d*ECONOMY_POINT_VALUE);after=Math.floor(capitals[id]/ECONOMY_POINT_VALUE);actual=after-before;if(capitals[id]!==oldCapital)capitalHistory.push({province:id,round:round+1,amount:capitals[id]-oldCapital,at:Date.now(),kind:'noticia',event:EV[i].t})}else{after=Math.max(0,before+d);actual=after-before}s[k]=after;(next.stats??={})[id]=s;if(actual){chg.push(`<span class="${actual>0?'up':'dn'}">${p.n}: ${k} ${actual>0?'+':''}${actual}</span>`);changes.push({stat:k,delta:actual,before,after})}});recordNeedChange(id,next.stats[id],changes,chg);if(changes.length)history.push({province:id,changes,event:EV[i].t,card:i,at:Date.now()})});const nextDrawn=[...(next.drawn||[]),i],nextRound=nextDrawn.length,actionHands={...(next.actionHands||{})};if(nextRound>0&&!actionHands[nextRound])actionHands[nextRound]=dealActionHands();return {...next,actionHands,capitals,capitalHistory,drawn:nextDrawn,round:nextRound,history}};
+  if(sync?.ready&&sync.update){sync.update(apply).then(state=>{if(!state?.drawn?.includes(i)){sync.state=state;sync.status='Confirmá el reparto de esta ronda antes de avanzar.';route();return}sync.state=state;drawn=state.drawn||[];P.forEach(p=>p.s={...(state.stats?.[p.id]||BASE[P.indexOf(p)])});P.forEach(p=>vals[p.id]=0);voteHTML='';saveLocalState();chgs[i]=chg.join('');route();openRoundIntro(state.round,i)}).catch(error=>{sync.status='No se pudo guardar: '+error.message;route()});return}
+  const state=apply({stats:Object.fromEntries(P.map(p=>[p.id,{...p.s}])),drawn:drawn.filter(n=>n!==i),history:window.fondosSync.state?.history||[]});drawn=state.drawn;P.forEach(p=>p.s={...state.stats[p.id]});P.forEach(p=>vals[p.id]=0);voteHTML='';window.fondosSync.state={...(window.fondosSync.state||{}),...state};saveLocalState();chgs[i]=chg.join('');route();openRoundIntro(state.round,i);
+}
+$('#page').addEventListener('click',e=>{
+  if(e.target.closest('#next-round'))draw();
+  else if(e.target.closest('[data-action]')){
+    const button=e.target.closest('[data-action]');openActionConfirm(button.dataset.province,button.dataset.action);
+  }
+  else if(e.target.closest('#finish')){
+    const sync=window.fondosSync;
+    if(sync?.ready&&sync.update){sync.update(state=>({...state,ended:true})).then(state=>{sync.state=state;drawn=state.drawn||[];saveLocalState();route()}).catch(error=>{sync.status='No se pudo terminar la partida: '+error.message;route()})}
+    else{window.fondosSync.state={...(window.fondosSync.state||{}),ended:true};saveLocalState();route()}
+  }
+  else if(e.target.closest('#shuffle')){
+    const sync=window.fondosSync;
+    if(sync?.ready&&sync.update){sync.update(()=>({capitalVersion:CAPITAL_VERSION,stats:Object.fromEntries(P.map((p,i)=>[p.id,{...BASE[i]}])),capitals:{...BASE_CAPITALS},capitalHistory:[],investmentHistory:[],investmentUsed:{},actionUses:{},actionHistory:[],actionHands:{},drawn:[],round:0,ended:false,history:[],allocations:{},confirmedRounds:{}})).then(state=>{sync.state=state;drawn=[];P.forEach((p,i)=>p.s={...BASE[i]});P.forEach(p=>vals[p.id]=0);voteHTML='';saveLocalState();newDeck();route()}).catch(error=>{sync.status='No se pudo iniciar una nueva partida: '+error.message;route()})}
+    else{newDeck();P.forEach(p=>vals[p.id]=0);voteHTML='';window.fondosSync.state={...(window.fondosSync.state||{}),capitalVersion:CAPITAL_VERSION,round:0,ended:false,history:[],allocations:{},confirmedRounds:{},capitals:{...BASE_CAPITALS},capitalHistory:[],investmentHistory:[],investmentUsed:{},actionUses:{},actionHistory:[],actionHands:{}};saveLocalState();route()}
+  }
+  else if(e.target.closest('#vote')){
+    const used=Object.values(vals).reduce((a,b)=>a+b,0);
+    const sync=window.fondosSync,round=Math.min(sync.state?.round??drawn.length,10);
+    if(used===BUDGET_UNITS&&round>0&&!sync.state?.ended&&!sync.state?.confirmedRounds?.[round]){
+      const allocation=Object.fromEntries(P.map(p=>[p.id,vals[p.id]*BUDGET_STEP]));
+      const confirm=raw=>{const current=migrateState(raw||{});if(current.confirmedRounds?.[round])return current;const capitals={...BASE_CAPITALS,...(current.capitals||{})},stats={...current.stats},capitalHistory=[...(current.capitalHistory||[])];P.forEach(p=>{const amount=allocation[p.id]||0;capitals[p.id]+=amount;stats[p.id]={...stats[p.id],Economía:Math.floor(capitals[p.id]/ECONOMY_POINT_VALUE)};stats[p.id].Necesidad=deriveNeed(stats[p.id]);if(amount)capitalHistory.push({province:p.id,round,amount,at:Date.now(),kind:'reparto'})});return {...current,stats,capitals,capitalHistory,allocations:{...(current.allocations||{}),[round]:allocation},confirmedRounds:{...(current.confirmedRounds||{}),[round]:true}}};
+      if(sync.ready&&sync.update)sync.update(confirm).then(state=>{sync.state=state;voteHTML=`<b class="ok">Dinero repartido y capitales actualizados en la ronda ${round}.</b>`;saveLocalState();route()}).catch(error=>{sync.status='No se pudo repartir el dinero: '+error.message;route()});
+      else{sync.state=confirm(sync.state||{});voteHTML=`<b class="ok">Dinero repartido y capitales actualizados en la ronda ${round}.</b>`;saveLocalState();route()}
+    }}
+  else{const b=e.target.closest('.slot.on');if(b)openCard(+b.dataset.i)}
+});
+$('#page').addEventListener('input',e=>{if(e.target.dataset.id){const id=e.target.dataset.id,others=Object.entries(vals).reduce((sum,[key,n])=>sum+(key===id?0:n),0);vals[id]=Math.min(+e.target.value,BUDGET_UNITS-others);voteHTML='';$('#result').innerHTML='Distribuí los US$ 100.000. Los controles avanzan de US$ 2.500 en US$ 2.500.';upd()}});
+$('#close').onclick=closeCard;
+$('#ov').addEventListener('click',e=>{if(e.target.id==='ov')closeCard()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCard()});
+window.addEventListener('hashchange',route);
+window.addEventListener('fondos-sync',()=>{const s=window.fondosSync;if(!s.ready)return;drawn=s.state?.drawn||[];const activeRound=Math.min(s.state?.round??s.state?.drawn?.length??0,10),needsRepair=s.state&&(s.state.capitalVersion!==CAPITAL_VERSION||s.state.needVersion!==NEED_VERSION||(activeRound>0&&!s.state.actionHands?.[activeRound]));if(needsRepair&&s.update){s.update(ensureCurrentActionHands).then(state=>{s.state=state;P.forEach((p,i)=>p.s={...(state.stats?.[p.id]||BASE[i])});saveLocalState();route()}).catch(error=>{s.status='No se pudo actualizar el estado compartido: '+error.message;route()});return}if(s.state){s.state=ensureCurrentActionHands(s.state);P.forEach((p,i)=>p.s={...(s.state.stats?.[p.id]||BASE[i])});saveLocalState()}route()});
+window.fondosReady?.then(()=>{const s=window.fondosSync;if(s.ready){drawn=s.state?.drawn||[];P.forEach((p,i)=>p.s={...(s.state?.stats?.[p.id]||BASE[i])});route()}});
+route();
+</script>
+</body>
+</html>
