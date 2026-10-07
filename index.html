@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fondos de la Nación: el juego</title>
+<style>
+@font-face{font-family:'Fredoka One';src:url('assets/FredokaOne-Regular.ttf') format('truetype');font-display:swap}
+:root{--bg:#111a3b;--panel:#1d2c5b;--ink:#f8f1cf;--dim:#a7b8d8;--cy:#61e5dc;--ye:#f5d15b;--mg:#e96ba6;--gr:#a7df67;--rd:#eb6e65;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*:before,*:after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Fredoka One','Trebuchet MS',sans-serif;font-size:22px;line-height:1.25;
+background-image:linear-gradient(rgba(97,229,220,.065) 1px,transparent 1px),linear-gradient(90deg,rgba(97,229,220,.065) 1px,transparent 1px),linear-gradient(180deg,#18264d 0%,#111a3b 52%,#111a3b 100%);background-size:32px 32px,32px 32px,100% 100%;background-attachment:fixed}
+h1,h2,h3,.px{font-family:'Fredoka One','Trebuchet MS',sans-serif;font-weight:400;line-height:1.5}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:4px solid var(--ye);display:flex;gap:8px;overflow-x:auto;padding:10px 12px}
+nav a{flex:none;color:var(--ink);text-decoration:none;border:3px solid var(--dim);background:var(--panel);padding:6px 12px;font-size:20px;white-space:nowrap}
+nav a[aria-current=page]{border-color:var(--ye);background:#334777;color:var(--ye);box-shadow:3px 3px 0 #0a1129}
+nav a:focus-visible,.btn:focus-visible,.slot:focus-visible,.action-card:focus-visible,.x:focus-visible,input:focus-visible{outline:3px solid var(--cy);outline-offset:3px}
+main{max-width:760px;margin:0 auto;padding:16px}
+.hero{display:flex;align-items:center;gap:18px;margin:14px 0 22px}
+.ava{font-size:64px;width:112px;height:112px;display:grid;place-items:center;background:var(--panel);border:5px solid var(--c);box-shadow:6px 6px 0 rgba(0,0,0,.45);flex:none}
+.hero h1{font-size:clamp(16px,4.6vw,26px);color:var(--c);margin:0 0 8px;text-shadow:3px 3px 0 rgba(0,0,0,.5)}
+.cls{color:var(--dim);font-size:24px}
+.sheet{background:var(--panel);border:4px solid var(--c);box-shadow:6px 6px 0 rgba(0,0,0,.45);padding:18px}
+.stat{display:grid;grid-template-columns:120px 1fr 40px;gap:10px;align-items:center;margin:10px 0;font-size:24px}
+.track{height:22px;background:var(--bg);border:3px solid var(--dim);display:flex;gap:3px;padding:2px}
+.track i{flex:1;background:#2b2470}.track i.on{background:var(--c)}
+.stat b{font-family:'Fredoka One','Trebuchet MS',sans-serif;font-weight:400;font-size:13px;text-align:right}
+.stat-note{margin:10px 0 0;color:var(--dim);font-size:18px}
+h2{font-size:14px;color:var(--cy);margin:30px 0 14px}
+.btn{font-family:'Fredoka One','Trebuchet MS',sans-serif;font-size:12px;background:var(--ye);color:#16123a;border:0;padding:14px 18px;cursor:pointer;box-shadow:0 5px 0 #b38900}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #b38900}
+.btn[disabled]{background:#5a5290;box-shadow:0 5px 0 #3b3290;cursor:not-allowed;color:#c9c2ee}
+.btn.alt{background:var(--dim);box-shadow:0 5px 0 #6b64a0;font-size:10px}
+.deckbar{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.left{color:var(--ye)}
+.slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:18px}
+.slot{aspect-ratio:3/4;max-height:180px;background:repeating-linear-gradient(45deg,#2b2470 0 8px,#241c5c 8px 16px);border:4px solid var(--dim);color:var(--dim);display:grid;place-items:center;text-align:center;padding:8px;font:inherit;cursor:default}
+.slot.on{background:var(--panel);border-color:var(--c);color:var(--ink);cursor:pointer}
+.slot .em{font-size:34px;display:block}.slot b{font-family:'Fredoka One','Trebuchet MS',sans-serif;font-weight:400;font-size:8px;line-height:1.5;color:var(--c)}
+.slot.q{font-family:'Fredoka One','Trebuchet MS',sans-serif;font-size:26px}
+.hud{background:var(--bg);border:4px solid var(--ye);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.hud b{font-family:'Fredoka One','Trebuchet MS',sans-serif;font-weight:400;font-size:14px}
+.ok{color:var(--gr)}.bad{color:var(--rd)}
+.row{display:grid;grid-template-columns:170px 1fr 56px;gap:12px;align-items:center;padding:8px 0;border-bottom:2px dashed #3b3290}
+.row label{color:var(--c)}
+input[type=range]{width:100%;accent-color:var(--c);height:28px}
+.pts{text-align:right;font-family:'Fredoka One','Trebuchet MS',sans-serif;font-size:12px}
+.ov{position:fixed;inset:0;z-index:50;background:rgba(10,7,32,.92);display:none;align-items:center;justify-content:center;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));overflow:auto}
+.ov.show{display:flex}
+.big{position:relative;width:100%;max-width:560px;background:var(--panel);border:6px solid var(--c);box-shadow:10px 10px 0 rgba(0,0,0,.5);padding:28px 22px 24px;text-align:center;animation:fl .5s steps(5)}
+@keyframes fl{from{transform:scale(.6) rotateY(90deg)}to{transform:none}}
+@media(prefers-reduced-motion:reduce){.big{animation:none}}
+.big .em{font-size:72px;line-height:1}
+.big h2{font-size:clamp(14px,4vw,20px);color:var(--c);margin:14px 0}
+.big p{font-size:26px;margin:0 0 14px}
+.x{position:absolute;top:8px;right:8px;width:48px;height:48px;background:var(--rd);color:#fff;border:0;font-family:'Fredoka One','Trebuchet MS',sans-serif;font-size:18px;cursor:pointer;box-shadow:0 4px 0 #a02c2c}
+.eff{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.eff span{border:3px solid;padding:2px 8px;font-size:20px}
+.eff .up{border-color:var(--gr);color:var(--gr)}.eff .dn{border-color:var(--rd);color:var(--rd)}
+.action-hand{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}
+.action-card{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:10px;min-width:0;min-height:300px;padding:12px;background:linear-gradient(145deg,#34277c,#1d174d);color:var(--ink);border:5px ridge var(--ye);box-shadow:5px 6px 0 rgba(0,0,0,.45);text-align:left;cursor:pointer;font:inherit;transition:transform .15s,filter .15s}
+.action-card:after{content:'';position:absolute;inset:5px;border:1px solid rgba(255,255,255,.18);pointer-events:none}
+.action-card.ready:hover{transform:translateY(-5px) rotate(-1deg)}.action-card.unavailable{filter:grayscale(1);opacity:.58;cursor:not-allowed}
+.action-card .card-icon{font-size:38px;text-align:center;line-height:1.2}.action-card .card-title{font:9px/1.6 'Fredoka One','Trebuchet MS',sans-serif;color:var(--ye);text-align:center}.action-card .card-description{font-size:18px;line-height:1.15}.action-card .eff{margin-top:auto;gap:5px}.action-card .eff span{font-size:14px;padding:2px 4px;border-width:2px;text-align:center}.action-card .card-cost{font-size:16px;color:var(--cy);text-align:center}.action-card .card-state{font:8px/1.5 'Fredoka One','Trebuchet MS',sans-serif;text-align:center;color:var(--gr)}
+.action-card.back{width:min(190px,100%);min-height:260px;aspect-ratio:3/4;align-items:center;justify-content:center;text-align:center;background:repeating-linear-gradient(45deg,#2b2470 0 9px,#241c5c 9px 18px);color:var(--ye);font:48px 'Fredoka One','Trebuchet MS',sans-serif;cursor:default}
+.modal-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:20px}.modal-actions .btn{font-size:10px}.btn.cancel{background:var(--dim);box-shadow:0 5px 0 #6b64a0}
+.syncbox{margin:0 0 16px;padding:10px 12px;border:3px solid var(--ye);background:var(--panel);font-size:20px}
+.syncbox small{display:block;color:var(--dim);font-size:18px;margin-top:4px}
+.log{margin-top:18px;padding:12px;background:var(--bg);border:3px solid var(--dim)}.log h2{margin:0 0 8px}.log ul{margin:0;padding-left:24px}.log li{padding:4px 0}
+.event-log{margin:12px 0;padding:12px;border:3px solid var(--event-color,var(--dim));background:var(--panel)}.event-log h3{font-size:10px;color:var(--event-color,var(--cy));margin:0 0 8px}.event-log p{margin:0 0 8px}.event-log .eff{justify-content:flex-start}
+.round-panel{margin:16px 0;padding:14px;background:var(--panel);border:4px solid var(--ye);box-shadow:5px 5px 0 rgba(0,0,0,.4)}.round-head{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.round-current{font-family:'Fredoka One','Trebuchet MS',sans-serif;color:var(--ye);font-size:13px}.round-left{color:var(--cy);font-size:22px}.round-track{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin-top:10px}.round-track i{height:14px;background:#2b2470;border:2px solid var(--dim)}.round-track i.done{background:var(--gr);border-color:var(--gr)}
+.capital-box{margin-top:16px;padding:14px;background:var(--bg);border:4px solid var(--gr);box-shadow:5px 5px 0 rgba(0,0,0,.35)}.capital-box span{display:block;color:var(--dim);font-size:20px}.capital-box b{display:block;color:var(--gr);font-family:'Fredoka One','Trebuchet MS',sans-serif;font-size:clamp(14px,4vw,20px);margin-top:8px}
+.game-hud-spacer{height:112px}
+.game-hud{position:fixed;top:max(8px,env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));z-index:6;display:flex;align-items:stretch;gap:0;width:max-content;max-width:calc(100vw - 24px);margin:0;background:#101936;border:4px solid var(--ye);box-shadow:5px 5px 0 #080e22;font-family:'Fredoka One','Trebuchet MS',sans-serif}
+.game-hud-round,.game-hud-money{display:flex;align-items:center;gap:10px;padding:9px 12px}.game-hud-round{position:relative;justify-content:center;min-width:150px;min-height:112px;padding-top:17px;border-right:3px solid #52658d}.game-hud-round:before,.game-hud-round:after{content:'';position:absolute;top:0;width:9px;height:34px;background:repeating-linear-gradient(0deg,#211711 0 5px,#765139 5px 9px);border:2px solid #17100d;box-shadow:2px 2px 0 rgba(0,0,0,.5);z-index:0}.game-hud-round:before{left:29%}.game-hud-round:after{right:29%}
+.round-sign{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:126px;min-height:91px;padding:8px 10px 6px;color:#17100d;border:5px solid #21130f;clip-path:polygon(7% 0,93% 0,93% 5%,100% 5%,100% 95%,93% 95%,93% 100%,7% 100%,7% 95%,0 95%,0 5%,7% 5%);background-color:#c88e60;background-image:repeating-linear-gradient(0deg,transparent 0 10px,rgba(112,61,39,.12) 10px 13px,transparent 13px 19px),linear-gradient(90deg,rgba(111,61,43,.2),transparent 17% 83%,rgba(111,61,43,.2));filter:drop-shadow(4px 5px 0 #080a12);image-rendering:pixelated}
+.round-sign-name{font-size:9px;letter-spacing:1px;color:#e62222;text-shadow:2px 2px 0 #160907,-1px -1px 0 #160907}.round-sign-number{font-size:34px;line-height:1.05;color:#fff;text-shadow:3px 3px 0 #17100d,-2px 2px 0 #17100d,2px -2px 0 #17100d,-2px -2px 0 #17100d}.round-sign-total{font-size:7px;color:#40271a;text-shadow:1px 1px 0 rgba(255,224,180,.7)}
+.game-hud-money{min-width:158px}.game-hud-money>div{display:flex;flex-direction:column;gap:6px}.game-hud-label{font-size:8px;color:var(--dim)}.game-hud-money b{font-size:11px;line-height:1.5;color:var(--ye)}.game-hud-money img{width:30px;height:30px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(2px 2px 0 #070d1b)}
+nav{background:#101936;border-bottom-color:var(--ye);box-shadow:0 4px 0 rgba(5,10,25,.8)}
+.sheet,.log,.round-panel,.event-log{box-shadow:5px 5px 0 #080e22}
+@media(max-width:520px){.game-hud-spacer{height:120px}.game-hud{top:max(8px,env(safe-area-inset-top,0px))}.game-hud-round{min-width:132px;min-height:100px;padding:12px 6px 7px}.round-sign{width:112px;min-height:82px}.round-sign-number{font-size:29px}.game-hud-money{min-width:138px;gap:7px;padding:8px}.game-hud-money b{font-size:9px}.game-hud-money img{width:26px;height:26px}}
+.round-timer-hud{position:fixed;top:max(10px,env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));z-index:30;display:flex;align-items:center;gap:9px;min-height:0;padding:0;background:transparent;color:#fff;border:0;border-radius:0;box-shadow:none;font-family:'Fredoka One','Trebuchet MS',sans-serif;font-size:clamp(20px,3.8vw,34px);line-height:1;white-space:nowrap}
+.round-timer-hud[hidden]{display:none}
+.round-timer-hud strong{-webkit-text-stroke:7px #080808;paint-order:stroke fill;text-shadow:none}
+.round-expired-overlay{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.78);pointer-events:none}
+.round-expired-overlay.show{display:flex}
+.round-expired-message{padding:18px 24px;border:6px solid #111;border-radius:25px;background:#fff;color:#f5d15b;text-align:center;font:clamp(24px,6vw,48px)/1.15 'Fredoka One','Trebuchet MS',sans-serif;-webkit-text-stroke:7px #080808;paint-order:stroke fill;text-shadow:none}
+body.round-paused *,body.round-paused *:before,body.round-paused *:after{animation-play-state:paused!important;transition:none!important}
+@media(max-width:620px){.action-hand{grid-template-columns:repeat(2,minmax(0,1fr))}.action-card{min-height:280px}}
+@media(max-width:520px){.stat{grid-template-columns:96px 1fr 34px}.row{grid-template-columns:1fr 56px}.row input{grid-column:1/-1;grid-row:2}.ava{width:84px;height:84px;font-size:46px}}
+/* Estética ilustrada para las provincias; la votación conserva su estructura. */
+.province-page{--province-accent:#ffcf36;position:relative;width:100vw;max-width:none;min-height:100vh;margin:0 calc(50% - 50vw);padding:18px clamp(16px,4vw,56px) 48px;overflow:hidden;background-color:#1c3413;background-image:url('assets/background.png'),url('assets/underground.png');background-repeat:no-repeat,repeat-y;background-position:center top,center top;background-size:100% auto,100% auto;color:#fff;font-family:'Fredoka One','Trebuchet MS',sans-serif}
+main:has(.province-page){max-width:none;margin:0;padding:0}
+html:has(.province-page),body:has(.province-page){background:#1c3413;background-image:none}
+.province-page{min-height:100vh;min-height:100dvh;background-position:center top,center top}
+html:has(.province-page),body:has(.province-page){width:100%;height:100%;overflow:hidden}
+main:has(.province-page){height:100vh;height:100dvh;overflow:hidden}
+.province-page{width:100%;height:100%;min-height:0;overflow:hidden}
+@media(max-height:1400px){
+  .province-page{height:100dvh;padding-top:10px;padding-bottom:12px}
+  .province-hud-spacer{height:clamp(58px,8vh,76px)}
+  .province-title{font-size:clamp(42px,9vw,84px)}
+  .province-scene{min-height:clamp(110px,19vh,175px);margin-bottom:8px}
+  .province-stats{padding:4px 0;row-gap:3px}
+  .province-stat{padding:2px 0;font-size:clamp(15px,2.7vw,22px)}
+  .province-stat img{width:clamp(25px,4vw,38px);height:clamp(25px,4vw,38px)}
+  .province-section{margin-bottom:0}
+  .province-card{height:min(39vh,340px);min-height:0;aspect-ratio:auto;padding:12px 8px}
+  .province-card-title{font-size:clamp(14px,2.2vw,24px)}
+  .province-effects{gap:clamp(8px,1.5vh,15px);margin-top:10px}
+  .province-effects span{font-size:clamp(17px,2.7vw,30px)}
+  .province-effects img{width:clamp(22px,3.7vw,36px);height:clamp(22px,3.7vw,36px)}
+  .province-cost{font-size:clamp(15px,2.4vw,26px)}
+}
+@media(max-height:700px){
+  .province-hud-spacer{height:54px}
+  .province-scene{min-height:clamp(90px,16vh,112px)}
+  .province-card{height:34vh;padding:8px 5px}
+  .province-card-title{font-size:clamp(13px,2vw,19px)}
+  .province-effects span{font-size:clamp(15px,2.4vw,22px)}
+  .province-cost{font-size:clamp(14px,2.2vw,20px)}
+}
+.province-page:before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:linear-gradient(180deg,transparent 0 36%,rgba(13,49,12,.12) 44%,#173713 68%,#173713 100%)}
+.province-page>*{position:relative;z-index:1}
+.province-hud-spacer{height:132px}
+.province-hud{position:fixed;z-index:20;top:max(10px,env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));display:flex;gap:12px;max-width:calc(100vw - 24px);font-family:'Fredoka One','Trebuchet MS',sans-serif}
+.province-hud-item{display:flex;align-items:center;gap:12px;min-height:0;padding:8px 10px;background:transparent;color:#fff;border:0;border-radius:0;box-shadow:none}
+.province-hud-item img{width:52px;height:52px;object-fit:contain}.province-hud-item strong{font-size:clamp(24px,4vw,38px);line-height:1;white-space:nowrap;text-shadow:1px 2px 0 #ddd}.province-hud-money{min-width:230px}.province-hud-money strong{font-size:clamp(21px,3.5vw,34px)}
+.province-hero{max-width:1160px;margin:0 auto 8px;text-align:center}.province-title{margin:0;color:#ffe000;font-size:clamp(44px,9vw,104px);line-height:1.1;letter-spacing:.5px;-webkit-text-stroke:3px #090909;text-shadow:5px 5px 0 #090909,-5px -5px 0 #090909,5px -5px 0 #090909,-5px 5px 0 #090909,8px 10px 0 rgba(0,0,0,.35)}
+.province-class{display:inline-block;margin-top:10px;padding:5px 18px;border:4px solid #111;border-radius:16px;background:#fff;color:#141414;font-size:clamp(18px,3vw,27px);box-shadow:3px 4px 0 #111}
+.province-scene{position:relative;max-width:1160px;min-height:clamp(300px,37vw,440px);margin:0 auto 18px;display:flex;align-items:center;justify-content:center}
+.province-decor{position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr;align-items:center;justify-items:center;pointer-events:none}
+.province-decor img{width:clamp(82px,12vw,150px);height:clamp(82px,12vw,150px);object-fit:contain;filter:drop-shadow(3px 5px 0 #111)}
+.province-decor img:nth-child(1){transform:translate(-8%,10%)}.province-decor img:nth-child(2){transform:translateY(-5%)}.province-decor img:nth-child(3){transform:translate(8%,8%)}.province-decor img:nth-child(4){transform:translate(-8%,-8%)}.province-decor img:nth-child(5){transform:translateY(5%)}.province-decor img:nth-child(6){transform:translate(8%,-5%)}
+.province-scene-badge{position:relative;z-index:1;display:grid;place-items:center;width:clamp(98px,14vw,158px);height:clamp(98px,14vw,158px);border:6px solid #111;border-radius:28px;background:#fff;box-shadow:5px 7px 0 #111}.province-scene-badge img{width:82%;height:82%;object-fit:contain}
+.province-stats{max-width:1160px;margin:0 auto 24px;padding:18px clamp(10px,3vw,34px);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 26px;background:rgba(14,43,12,.94);border:5px solid #101010;border-radius:26px;box-shadow:0 7px 0 rgba(0,0,0,.45)}
+.province-stat{display:flex;align-items:center;gap:12px;min-width:0;padding:8px 3px;font-size:clamp(19px,3vw,34px);line-height:1.15;color:#fff;text-shadow:2px 3px 0 #050505,-1px -1px 0 #050505;-webkit-text-stroke:.45px #080808}
+.province-stat img{flex:none;width:clamp(38px,6vw,62px);height:clamp(38px,6vw,62px);object-fit:contain;filter:drop-shadow(2px 3px 0 #050505)}.province-stat strong{color:#ffdc19;font-size:1.12em;-webkit-text-stroke:.6px #050505}
+.province-need-note{grid-column:1/-1;margin:2px 0 0;color:#f2edc9;font-size:16px;text-shadow:1px 2px #000}
+.province-section{max-width:1160px;margin:0 auto 22px;padding:16px;background:rgba(15,37,16,.94);border:5px solid #111;border-radius:26px;box-shadow:0 7px 0 rgba(0,0,0,.4)}
+.province-section h2{margin:0 0 8px;color:#fff;font-size:clamp(24px,4vw,38px);text-align:center;text-shadow:3px 3px 0 #111,-2px -2px 0 #111;-webkit-text-stroke:1px #111}
+.province-section>p{margin:0 0 14px;text-align:center;color:#f2edc9;font-size:18px}
+.province-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:12px 0 2px}
+.province-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;min-width:0;min-height:420px;padding:18px 14px;background:#fff;color:#111;border:6px solid #111;border-radius:34px;box-shadow:4px 6px 0 #111;text-align:center;font:inherit;cursor:pointer;transition:transform .15s,filter .15s}
+.province-card:enabled:hover{transform:translateY(-6px) rotate(-1deg)}.province-card.unavailable{filter:grayscale(1);background:#858585;color:#282828;cursor:not-allowed}.province-card:disabled{cursor:not-allowed}
+.province-card-title{font-size:clamp(18px,2.25vw,28px);line-height:1.12;text-shadow:1px 2px 0 #ccc}.province-card-icon{font-size:38px;line-height:1}.province-card-description{font-size:16px;line-height:1.2;color:#333}
+.province-effects{display:grid;gap:6px;width:100%;margin-top:auto}.province-effects span{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;font-size:19px;line-height:1.05;text-shadow:1px 1px 0 #ddd}.province-effects img{width:28px;height:28px;object-fit:contain}.province-effects .up{color:#13a400}.province-effects .dn{color:#ed1919}.province-cost{margin-top:9px;color:#12a400;font-size:clamp(21px,2.8vw,32px);text-shadow:2px 2px 0 #111,-1px -1px 0 #111;-webkit-text-stroke:.6px #111}.province-card-state{margin-top:4px;color:#137b12;font-size:14px}.province-card.unavailable .province-card-state{color:#222}
+.province-question{grid-column:1/-1;justify-self:center;min-height:230px;max-width:250px;font-size:92px;color:#111}
+.province-history{max-width:1160px;margin:0 auto 22px;padding:16px 20px;background:rgba(15,37,16,.94);border:5px solid #111;border-radius:24px;color:#fff;box-shadow:0 6px 0 rgba(0,0,0,.35)}.province-history h2{margin:0 0 10px;color:#fff;font-size:clamp(21px,3vw,30px);text-shadow:2px 2px #111}.province-history p{margin:5px 0}.province-history .event-log{border-width:3px;border-radius:14px}.province-history .event-log h3{font-size:20px}.province-history .eff span{border-radius:8px;background:rgba(0,0,0,.22)}
+.province-page .syncbox{max-width:1160px;margin:0 auto 14px;border:4px solid #111;border-radius:14px;background:#244c24;color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.35)}.province-page .syncbox small{color:#e5efcd}
+@media(max-width:700px){.province-hud-spacer{height:112px}.province-hud{gap:7px;left:8px}.province-hud-item{min-height:64px;padding:6px 10px;gap:7px;border-width:4px;border-radius:22px}.province-hud-item img{width:39px;height:39px}.province-hud-money{min-width:0}.province-scene{min-height:300px}.province-stats{gap:2px 12px;padding:12px}.province-stat{gap:7px;font-size:clamp(16px,3.2vw,25px)}.province-card{min-height:370px;padding:14px 9px;border-width:5px;border-radius:27px}.province-card-description{font-size:15px}.province-effects span{font-size:16px}.province-effects img{width:23px;height:23px}}
+@media(max-width:480px){.province-page{padding-left:10px;padding-right:10px}.province-hud-spacer{height:94px}.province-hud-item{min-height:57px;padding:4px 8px}.province-hud-item img{width:32px;height:32px}.province-hud-item strong{font-size:24px}.province-hud-money strong{font-size:19px}.province-title{font-size:clamp(41px,11vw,60px);-webkit-text-stroke:2px #090909}.province-class{font-size:16px}.province-scene{min-height:250px}.province-decor img{width:clamp(64px,19vw,88px);height:clamp(64px,19vw,88px)}.province-stats{grid-template-columns:1fr;padding:10px 16px;border-radius:19px}.province-stat{font-size:24px}.province-stat img{width:42px;height:42px}.province-need-note{font-size:14px}.province-section{padding:11px;border-width:4px;border-radius:21px}.province-cards{gap:8px}.province-card{min-height:350px;padding:12px 7px;border-radius:22px}.province-card-title{font-size:17px}.province-card-description{font-size:13px}.province-card-icon{font-size:30px}.province-effects span{font-size:14px;gap:3px}.province-effects img{width:20px;height:20px}.province-cost{font-size:18px}.province-card-state{font-size:11px}.province-question{font-size:72px}}
+@media(max-width:600px){.province-cards{grid-template-columns:1fr}.province-card{min-height:320px;max-width:380px;width:100%;justify-self:center}.province-card-title{font-size:23px}.province-card-description{font-size:17px}.province-effects span{font-size:18px}}
+@media(max-width:360px){.province-card{min-height:300px;max-width:280px}.province-card-title{font-size:22px}.province-card-description{font-size:16px}.province-effects span{font-size:18px}}
+/* Ajustes fieles a las referencias compartidas */
+.province-hud-item,.province-hud-item strong{box-shadow:none;text-shadow:none}
+.province-hud-item strong{color:#fff;-webkit-text-stroke:3px #080808;paint-order:stroke fill}
+.province-page:before{display:none}
+.province-title{text-shadow:5px 5px 0 #090909,-5px -5px 0 #090909,5px -5px 0 #090909,-5px 5px 0 #090909}
+.province-title{-webkit-text-stroke:5px #fff;paint-order:stroke fill;text-shadow:7px 7px 0 #111,-7px 7px 0 #111,7px -7px 0 #111,-7px -7px 0 #111}
+.province-decor img,.province-stat img,.province-effects img{filter:none;box-shadow:none;text-shadow:none}
+.province-scene-badge{display:none}
+.province-class,.province-need-note,.province-history,.province-page .syncbox{display:none!important}
+.province-stats{grid-template-columns:repeat(2,minmax(0,1fr));padding:10px 0;background:transparent;border:0;border-radius:0;box-shadow:none}
+.province-section{max-width:1160px;margin:0 auto 22px;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none}
+.province-section h2,.province-section>p{display:none}
+.province-decor{grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr}
+.province-decor img:nth-child(4){grid-column:4}.province-decor img:nth-child(5){grid-column:2}.province-decor img:nth-child(6){grid-column:3}
+.province-stat{ text-shadow:none;-webkit-text-stroke:0 }
+.province-stat strong{-webkit-text-stroke:0}
+.province-cards{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:6px}
+.province-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0;min-height:0;aspect-ratio:.535;padding:16px 8px 10px;background:#fff;color:#080808;border:4px solid #080808;border-radius:30px;box-shadow:none;text-align:center;font:inherit;cursor:pointer;overflow:hidden}
+.province-card:enabled:hover{transform:none}.province-card.unavailable{filter:none;opacity:1;background:#858585;color:#282828}.province-card-title{font-size:clamp(13px,3.5vw,25px);line-height:1.02;color:#fff;-webkit-text-stroke:1px #111;text-shadow:1px 1px 0 #111,-1px -1px 0 #111}.province-card-icon{display:none}.province-card-description,.province-card-state{display:none}
+.province-effects{display:grid;gap:18px;width:100%;margin-top:18px}.province-effects span{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:nowrap;font-size:clamp(20px,5vw,38px);line-height:1;color:#080808;-webkit-text-stroke:1px #080808;text-shadow:1px 1px #080808}.province-effects img{flex:none;width:clamp(22px,7vw,42px);height:clamp(22px,7vw,42px);object-fit:contain;filter:none}.province-effects b{font-weight:400}.province-effects .up{color:#00e000}.province-effects .dn{color:#f00000}
+.province-cost{margin:auto 0 2px;color:#00e000;font-size:clamp(16px,4.8vw,32px);line-height:1;-webkit-text-stroke:1px #080808;text-shadow:1px 1px #080808}.province-card.unavailable .province-cost{color:#292929}.province-question{grid-column:1/-1;justify-self:center;aspect-ratio:1;min-height:0;max-width:160px}
+@media(max-width:600px){.province-cards{grid-template-columns:repeat(3,minmax(0,1fr))}.province-card{max-width:none;width:auto;min-height:0;padding:16px 5px 8px;border-width:3px;border-radius:26px}.province-card-title{font-size:clamp(12px,3.6vw,17px)}.province-effects{gap:18px}.province-effects span{font-size:clamp(17px,5.4vw,25px)}.province-effects img{width:clamp(21px,6.5vw,30px);height:clamp(21px,6.5vw,30px)}.province-cost{font-size:clamp(14px,4.7vw,22px)}}
+@media(max-width:480px){.province-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}.province-stat{font-size:clamp(15px,4vw,18px);gap:5px}.province-stat img{width:clamp(27px,8vw,36px);height:clamp(27px,8vw,36px)}}
+@media(max-width:360px){.province-card{padding-inline:3px;border-radius:20px}.province-card-title{font-size:11px}.province-effects span{font-size:16px}.province-cost{font-size:13px}}
+/* Estadísticas: escala y contraste como en el prototipo móvil */
+.province-stats{width:100%;max-width:1160px;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:clamp(10px,3vw,28px);row-gap:8px;padding:12px 0}
+.province-stat{gap:clamp(7px,1.5vw,14px);padding:5px 0;font-size:clamp(19px,5vw,31px);line-height:1.08;white-space:nowrap}
+.province-stat span,.province-stat strong{color:#fff;-webkit-text-stroke:2px #080808;paint-order:stroke fill;text-shadow:2px 2px 0 #080808}
+.province-stat img{width:clamp(32px,8vw,60px);height:clamp(32px,8vw,60px)}
+@media(max-width:480px){.province-stats{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:8px;row-gap:8px}.province-stat{gap:6px;font-size:clamp(16px,4.3vw,23px)}.province-stat img{width:clamp(28px,8vw,40px);height:clamp(28px,8vw,40px)}.province-stat span,.province-stat strong{-webkit-text-stroke:1.6px #080808}}
+.province-stat span,.province-stat strong{color:#fff;-webkit-text-stroke:7px #080808;paint-order:stroke fill;text-shadow:none}
+.province-stats{display:none!important;visibility:hidden}
+.province-hud{position:absolute;top:auto;bottom:clamp(140px,41vw,300px);left:clamp(10px,3vw,34px);z-index:30;gap:clamp(5px,1.2vw,12px);flex-wrap:wrap;align-items:center}
+body:has(.province-page) .round-timer-hud{top:auto;right:clamp(10px,3vw,34px);bottom:clamp(140px,41vw,300px);z-index:31}
+.province-hud-population{min-width:0;gap:6px}
+.province-hud-population img{width:clamp(28px,5vw,44px);height:clamp(28px,5vw,44px)}
+.province-hud-population strong{font-size:clamp(20px,3.2vw,30px)}
+.province-section{transform:translateY(25%)}
+.province-hero{position:absolute!important;top:calc(clamp(12px,4dvh,40px) - 15px);left:0;right:0;height:auto;margin:0 auto;z-index:111!important;display:flex;align-items:center;justify-content:center;gap:0;pointer-events:none}
+.province-title{position:relative;z-index:111;top:auto;left:auto;transform:none;width:max-content;max-width:calc(100vw - 20px);margin:0 auto;white-space:nowrap;color:#ffe000;-webkit-text-stroke:7px #050505;paint-order:stroke fill;text-shadow:none;letter-spacing:0;font-size:clamp(32px,7vw,68px)}
+.province-title:before{content:attr(data-title);position:absolute;inset:0;z-index:-1;color:#ffe000;-webkit-text-stroke:14px #fff;paint-order:stroke fill;text-shadow:none;pointer-events:none}
+.province-title-long{font-size:clamp(27px,8vw,44px)}
+.province-stats,.province-section{position:relative;top:auto}
+.province-layout{position:absolute!important;top:clamp(90px,19dvh,190px);bottom:0;left:0;right:0;z-index:5!important;display:flex;flex-direction:column;gap:clamp(12px,3dvh,28px);padding:0 clamp(16px,4vw,56px);pointer-events:none}
+.province-layout>*{width:100%;max-width:1160px;margin:0 auto!important;position:relative;top:auto;pointer-events:auto}
+.province-layout .province-stats{display:none!important}
+.province-layout .province-section{flex:none;padding:0;margin: auto auto 0!important}
+@media(max-width:480px){.province-layout{padding:0 10px}}
+@media(max-width:600px){.province-cards{width:92%;margin-left:auto;margin-right:auto}.province-card{height:auto;aspect-ratio:.535}}
+.province-layout .province-card{height:auto;min-height:0;aspect-ratio:.535}
+.province-layout .province-cost{position:relative;left:auto;right:auto;bottom:auto;flex:none;margin:clamp(14px,3vw,26px) 0 0}
+.province-card-title,.province-effects b,.province-cost{-webkit-text-stroke:7px #080808;paint-order:stroke fill;text-shadow:none}
+.province-hud-item strong{-webkit-text-stroke:7px #080808;paint-order:stroke fill;text-shadow:none}
+.province-stat-change{display:inline-block;margin-left:.2em;font-size:.82em;line-height:1;vertical-align:baseline;position:relative;z-index:2;-webkit-text-stroke:7px #080808;paint-order:stroke fill;text-shadow:none;animation:province-stat-float 1.8s ease-out both;animation-delay:var(--change-delay,0ms);pointer-events:none}
+.province-stat-change.up{color:#00e000}.province-stat-change.dn{color:#f00000}
+@keyframes province-stat-float{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-24px)}}
+@media(hover:hover) and (pointer:fine){.province-card:not(.province-question){transition:transform .2s ease,filter .15s;transform-origin:center bottom}.province-cards>.province-card:nth-child(1):hover:not(.province-question){z-index:3;transform:translateY(-8px) scale(1.06) rotate(-3deg)}.province-cards>.province-card:nth-child(2):hover:not(.province-question){z-index:3;transform:translateY(-8px) scale(1.06)}.province-cards>.province-card:nth-child(3):hover:not(.province-question){z-index:3;transform:translateY(-8px) scale(1.06) rotate(3deg)}}
+.province-card.tap-pulse{z-index:4;animation:province-card-tap .26s ease-in-out}
+.province-card.unavailable .province-card-title,.province-card.unavailable .province-effects span,.province-card.unavailable .province-cost{color:#fff}
+.province-card.unavailable .province-effects img{filter:grayscale(1) saturate(0)}
+@keyframes province-card-tap{0%,100%{scale:1}45%{scale:.94}}
+.province-money-change{display:inline-block;position:relative;margin-left:4px;color:#f00000;font-size:clamp(12px,3vw,18px);line-height:1;white-space:nowrap;-webkit-text-stroke:7px #080808;paint-order:stroke fill;text-shadow:none;animation:province-stat-float 1.8s ease-out both;animation-delay:var(--change-delay,0ms);pointer-events:none}
+.province-money-gain{display:inline-block;position:relative;margin-left:4px;color:#00e000;font-size:clamp(12px,3vw,18px);line-height:1;white-space:nowrap;-webkit-text-stroke:7px #080808;paint-order:stroke fill;text-shadow:none;animation:province-stat-float 1.8s ease-out both;animation-delay:var(--change-delay,0ms);pointer-events:none}
+.province-bird-layer{position:absolute!important;inset:0;z-index:auto!important;overflow:hidden;pointer-events:none}
+.province-bird-layer{bottom:auto!important;height:123.67vw!important}
+.province-houses-layer{position:absolute!important;inset:0;z-index:auto!important;overflow:visible;pointer-events:none;bottom:auto!important;height:123.67vw!important}
+.province-house-wrap{position:absolute;left:var(--house-x);top:var(--house-y);width:clamp(50px,13vw,108px);transform:translate(-50%,-50%);padding:0;border:0;background:transparent;text-align:left;font:inherit;pointer-events:auto;cursor:pointer}
+.province-house-wrap.is-large{width:clamp(69px,17.79vw,147.8px)}
+.province-house{display:block;width:100%;height:auto;object-fit:contain;filter:none;box-shadow:none}
+.province-house-health{position:absolute;left:50%;bottom:-8px;display:block;width:70%;height:7px;transform:translateX(-50%);overflow:hidden;border:1px solid #080808;border-radius:5px;background:#430909;box-shadow:0 1px 2px #080808}
+.province-house-health i{display:block;width:var(--health);height:100%;border-radius:inherit;background:linear-gradient(180deg,#ff5149,#d90000);transition:width .45s ease}
+.province-house-income{position:absolute;left:50%;top:-5px;transform:translate(-50%,-100%);padding:1px 4px;border-radius:6px;background:#1c3413;color:#00e000;font-size:clamp(10px,2.7vw,16px);line-height:1.1;white-space:nowrap;-webkit-text-stroke:3px #080808;paint-order:stroke fill;text-shadow:none}
+.house-upgrade-prompt{position:fixed;inset:0;z-index:99990;display:grid;place-items:center;padding:12px;background:rgba(0,0,0,.68)}
+.house-upgrade-prompt[hidden]{display:none}
+.house-upgrade-panel{width:min(440px,calc(100vw - 24px));padding:20px 14px 16px;background:#fff;border:5px solid #080808;border-radius:22px;text-align:center;font-family:'Fredoka One','Trebuchet MS',sans-serif}
+.house-upgrade-panel h2{margin:0 0 12px;color:#fff;font-size:clamp(27px,7vw,40px);-webkit-text-stroke:6px #080808;paint-order:stroke fill}
+.house-upgrade-panel p{margin:8px 0 16px;color:#fff;font-size:clamp(17px,4.5vw,24px);line-height:1.25;-webkit-text-stroke:4px #080808;paint-order:stroke fill}
+.house-upgrade-actions{display:flex;gap:10px}
+.house-upgrade-actions button{flex:1;min-height:52px;border:3px solid #080808;border-radius:13px;font:20px 'Fredoka One','Trebuchet MS',sans-serif;cursor:pointer}
+.house-upgrade-confirm{background:#0875ff;color:#fff;-webkit-text-stroke:2px #080808;paint-order:stroke fill}
+.house-upgrade-confirm:disabled{background:#888;color:#ddd;cursor:not-allowed}
+.house-upgrade-cancel{background:#ddd;color:#111}
+.province-bird{position:absolute;left:0;top:var(--bird-top);width:clamp(16px,4vw,38px);height:auto;will-change:transform;animation:bird-cross var(--bird-duration) linear forwards}
+.province-bird img{display:block;width:100%;height:auto;filter:none;box-shadow:none;animation:bird-bob 3.8s ease-in-out infinite}
+.province-bird.from-left img{transform:scaleX(-1)}
+.province-bird.from-right{animation-name:bird-cross-left}
+.province-bird-dot{position:absolute;z-index:0;width:4px;height:4px;border-radius:50%;background:#000;opacity:1;transform:translate(-50%,-50%);animation:bird-dot-fade 1s ease-out 1s forwards;pointer-events:none}
+.province-bird{z-index:10}
+.province-person-layer{position:absolute!important;inset:0;z-index:auto!important;overflow:hidden;pointer-events:none;bottom:auto!important;height:123.67vw!important}
+.province-person{position:absolute;left:0;width:clamp(18px,3vw,38px);height:auto;will-change:transform;animation:person-cross-right var(--person-duration) linear forwards}
+.province-person.from-right{animation-name:person-cross-left}
+.province-person img{display:block;width:100%;height:auto;transform-origin:50% 90%;animation:person-hop-left .84s linear infinite}
+.province-person.from-right img{animation-name:person-hop-right}
+.province-person-name{position:absolute;left:50%;bottom:calc(100% + 2px);transform:translateX(-50%);color:#fff;font-size:13px;line-height:1;white-space:nowrap;-webkit-text-stroke:7px #080808;paint-order:stroke fill;text-shadow:none}
+.name-prompt{position:fixed;inset:0;z-index:100000;display:grid;place-items:center;padding:12px;background:rgba(0,0,0,.48)}
+.name-prompt[hidden]{display:none}
+.name-prompt-panel{width:min(470px,calc(100vw - 24px));padding:24px 14px 16px;background:#fff;border:4px solid #080808;border-radius:21px;text-align:center;font-family:'Fredoka One','Trebuchet MS',sans-serif}
+.name-prompt-panel h2{margin:0 0 24px;color:#fff;font-size:clamp(32px,9vw,48px);line-height:1.15;-webkit-text-stroke:4px #080808;paint-order:stroke fill;text-shadow:none}
+.name-prompt-panel input{width:100%;height:60px;margin:0 0 22px;padding:8px 16px;background:#ddd;border:0;border-radius:14px;color:#111;font:24px 'Fredoka One','Trebuchet MS',sans-serif;outline:3px solid transparent}
+.name-prompt-panel input:focus{outline-color:#0875ff}
+.name-prompt-ready,.name-prompt-later{width:100%;min-height:58px;border:0;border-radius:14px;font:clamp(25px,7vw,38px) 'Fredoka One','Trebuchet MS',sans-serif;cursor:pointer}
+.name-prompt-ready{margin-bottom:12px;background:#0875ff;color:#fff;-webkit-text-stroke:3px #080808;paint-order:stroke fill}
+.name-prompt-later{background:transparent;color:#aaa;font-size:25px}
+.name-prompt-error{min-height:20px;margin:0 0 5px;color:#d00;font:15px 'Fredoka One','Trebuchet MS',sans-serif}
+.province-name-wrap{position:absolute;left:max(8px,env(safe-area-inset-left,0px));top:max(8px,env(safe-area-inset-top,0px));transform:none;width:clamp(30px,11.25vw,101.25px);height:clamp(30px,11.25vw,101.25px);pointer-events:auto}
+.province-name-change{display:block;width:100%;height:100%;padding:0;border:0;background:transparent;cursor:pointer}
+.province-name-change img{display:block;width:100%;height:100%;object-fit:contain}
+.province-name-label{position:absolute;top:100%;left:50%;transform:translateX(-50%);width:max-content;max-width:min(140px,40vw);overflow:hidden;color:#fff;font-size:12px;line-height:1.1;text-overflow:ellipsis;white-space:nowrap;-webkit-text-stroke:7px #080808;paint-order:stroke fill;text-shadow:none;pointer-events:none}
+@keyframes person-cross-right{from{transform:translateX(-100%)}to{transform:translateX(calc(100vw + 100%))}}
+@keyframes person-cross-left{from{transform:translateX(100vw)}to{transform:translateX(-100%)}}
+@keyframes person-hop-left{0%{transform:translateY(0) rotate(0);animation-timing-function:cubic-bezier(.12,.75,.25,1)}23%{transform:translateY(-1.2vw) rotate(-7deg)}32%{transform:translateY(-1.2vw) rotate(-7deg);animation-timing-function:cubic-bezier(.2,.85,.35,1)}50%{transform:translateY(0) rotate(0);animation-timing-function:cubic-bezier(.12,.75,.25,1)}73%{transform:translateY(-1.2vw) rotate(-7deg)}82%{transform:translateY(-1.2vw) rotate(-7deg);animation-timing-function:cubic-bezier(.2,.85,.35,1)}100%{transform:translateY(0) rotate(0)}}
+@keyframes person-hop-right{0%{transform:translateY(0) rotate(0);animation-timing-function:cubic-bezier(.12,.75,.25,1)}23%{transform:translateY(-1.2vw) rotate(7deg)}32%{transform:translateY(-1.2vw) rotate(7deg);animation-timing-function:cubic-bezier(.2,.85,.35,1)}50%{transform:translateY(0) rotate(0);animation-timing-function:cubic-bezier(.12,.75,.25,1)}73%{transform:translateY(-1.2vw) rotate(7deg)}82%{transform:translateY(-1.2vw) rotate(7deg);animation-timing-function:cubic-bezier(.2,.85,.35,1)}100%{transform:translateY(0) rotate(0)}}
+@keyframes bird-cross{from{transform:translateX(-100%)}to{transform:translateX(calc(100vw + 100%))}}
+@keyframes bird-cross-left{from{transform:translateX(100vw)}to{transform:translateX(-100%)}}
+@keyframes bird-bob{0%,100%{translate:0 0}50%{translate:0 -.55vw}}
+@keyframes bird-dot-fade{from{opacity:1}to{opacity:0}}
+.province-question.start-locked{position:relative;display:grid;place-items:center;cursor:pointer}
+.province-cards .province-question.start-locked{grid-column:auto;justify-self:stretch;width:100%;max-width:none;min-height:0;aspect-ratio:.535;background:#858585;color:#454545;font-size:clamp(50px,10vw,76px)}
+.province-question.start-locked:after{content:'';position:absolute;z-index:2;inset:0;border-radius:inherit;background:rgba(0,0,0,.32);opacity:0;transition:opacity .25s ease;pointer-events:none}
+.province-question-mark{position:relative;z-index:1;transition:filter .25s ease,opacity .25s ease}
+.province-start-message{position:absolute;z-index:3;inset:12px;display:grid;place-items:center;color:#fff;font-size:clamp(13px,3.8vw,18px);line-height:1.1;-webkit-text-stroke:7px #080808;paint-order:stroke fill;text-shadow:none;opacity:0;transform:scale(.85);transition:opacity .25s ease,transform .25s ease;pointer-events:none}
+.province-question.start-locked:hover:after,.province-question.start-locked:focus-visible:after{opacity:1}
+.province-question.start-locked:hover .province-start-message,.province-question.start-locked:focus-visible .province-start-message{opacity:1;transform:scale(1)}
+.province-start-toast{position:fixed;z-index:100;top:auto;bottom:max(12px,env(safe-area-inset-bottom,0px));left:50%;width:max-content;max-width:calc(100vw - 24px);padding:8px 12px;color:#f00000;font-size:clamp(14px,4vw,20px);line-height:1.1;text-align:center;white-space:nowrap;-webkit-text-stroke:7px #080808;paint-order:stroke fill;text-shadow:none;opacity:0;visibility:hidden;pointer-events:none}
+.province-start-toast.show{visibility:visible;animation:province-start-pop 5.9s linear both}
+@keyframes province-start-pop{0%{opacity:0;transform:translate(-50%,0) scale(.72)}4%{opacity:1;transform:translate(-50%,0) scale(1.15)}7%{opacity:1;transform:translate(-50%,0) scale(1)}92%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,0) scale(.92)}}
+.province-acid-rain-layer{position:absolute!important;z-index:150!important;inset:0;overflow:hidden;isolation:isolate;opacity:0;pointer-events:none;transition:opacity 1.4s ease}
+.province-page:after{content:'';position:absolute;inset:0;z-index:200;isolation:isolate;pointer-events:none;background-image:url('assets/background-up.png');background-repeat:no-repeat;background-position:center top;background-size:100% auto}
+.province-acid-rain-layer.is-visible{opacity:1}
+.province-acid-darkener{position:absolute;z-index:0;inset:0;background:rgba(0,0,0,.24)}
+.province-acid-cloud{position:absolute;z-index:2;top:var(--cloud-y);left:var(--cloud-x);width:clamp(100px,29vw,300px);height:auto;max-width:none;transform:translateX(-50%);opacity:.96;filter:drop-shadow(0 2px 0 rgba(0,0,0,.18));animation:acid-cloud-drift var(--cloud-time) ease-in-out infinite alternate;animation-delay:var(--cloud-delay)}
+.province-acid-drops{position:absolute;z-index:1;inset:12% 0 25%;overflow:hidden}
+.province-acid-drop{position:absolute;top:var(--drop-y);left:var(--drop-x);width:clamp(2px,.38vw,4px);height:clamp(15px,2.8vh,31px);border-radius:3px;background:linear-gradient(180deg,rgba(91,255,45,0),#59ff32 22%,#28d51a 82%,rgba(40,213,26,0));box-shadow:0 0 5px rgba(58,255,34,.72);opacity:0;animation:acid-drop-fall var(--drop-time) linear var(--drop-delay) infinite}
+.province-hero{z-index:220!important}
+.province-layout{z-index:210!important}
+.province-hud{z-index:230!important}
+body:has(.province-page) .round-timer-hud,body:has(.province-page) .province-start-toast{z-index:240!important}
+@keyframes acid-cloud-drift{from{translate:-1.2vw 0}to{translate:1.2vw 0}}
+@keyframes acid-drop-fall{0%{translate:0 -2vh;opacity:0}8%{opacity:.92}88%{opacity:.82}100%{translate:0 39vh;opacity:0}}
+</style>
+</head>
+<body>
+<main id="page"></main>
+<div class="round-timer-hud" id="round-timer-hud" aria-label="Tiempo restante de la ronda" hidden><span aria-hidden="true">⏱️</span><strong id="round-timer-value">05:00</strong></div>
+<div class="round-expired-overlay" id="round-expired-overlay" role="status" aria-live="assertive"><div class="round-expired-message">Es hora de repartir el dinero</div></div>
+<div class="house-upgrade-prompt" id="house-upgrade-prompt" hidden>
+  <section class="house-upgrade-panel" role="dialog" aria-modal="true" aria-labelledby="house-upgrade-title">
+    <h2 id="house-upgrade-title">Mejorar casa</h2>
+    <p id="house-upgrade-description"></p>
+    <div class="house-upgrade-actions"><button class="house-upgrade-confirm" id="house-upgrade-confirm" type="button">Mejorar · $100.000</button><button class="house-upgrade-cancel" id="house-upgrade-cancel" type="button">Cancelar</button></div>
+  </section>
+</div>
+<div class="name-prompt" id="name-prompt" hidden>
+  <section class="name-prompt-panel" role="dialog" aria-modal="true" aria-labelledby="name-prompt-title">
+    <h2 id="name-prompt-title">Pon un nombre</h2>
+    <input id="name-prompt-input" type="text" maxlength="24" autocomplete="nickname" aria-label="Tu nombre">
+    <p class="name-prompt-error" id="name-prompt-error" aria-live="polite"></p>
+    <button class="name-prompt-ready" id="name-prompt-ready" type="button">Listo</button>
+    <button class="name-prompt-later" id="name-prompt-later" type="button">Más tarde</button>
+  </section>
+</div>
+
+<script>
+// Keep the local page renderable even when the Firebase browser module is blocked by file://.
+window.fondosSync = window.fondosSync || {ready:false, room:new URLSearchParams(location.search).get('sala') || 'aula', state:null, status:'Sin conexión al servidor · modo local'};
+</script>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
+import { getDatabase, ref, onValue, runTransaction, serverTimestamp, onDisconnect, set, remove } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB9DFNwVrGh236MdOF9zxcXP8ZEJhh7tuk",
+  authDomain: "proyecto-naciones.firebaseapp.com",
+  databaseURL: "https://proyecto-naciones-default-rtdb.firebaseio.com",
+  projectId: "proyecto-naciones",
+  storageBucket: "proyecto-naciones.firebasestorage.app",
+  messagingSenderId: "862886174294",
+  appId: "1:862886174294:web:12a26518a74da2b3faa5f7",
+  measurementId: "G-925FKZ0MCW"
+};
+window.fondosSync = window.fondosSync || {ready:false, room:new URLSearchParams(location.search).get('sala') || 'aula', state:null, status:'Configuración de sincronización pendiente'};
+window.fondosReady = (async()=>{
+  if(!firebaseConfig?.apiKey || !firebaseConfig?.databaseURL) return;
+  try {
+    const app=initializeApp(firebaseConfig), db=getDatabase(app), roomRef=ref(db,'salas/'+window.fondosSync.room),presenceRoomRef=ref(db,'presencia/'+window.fondosSync.room),sessionStorageKey='fondos-presence-session',presenceId=sessionStorage.getItem(sessionStorageKey)||(crypto.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    sessionStorage.setItem(sessionStorageKey,presenceId);
+    const myPresenceRef=ref(db,`presencia/${window.fondosSync.room}/${presenceId}`),connectedRef=ref(db,'.info/connected');
+    window.fondosSync.connectedPeople=[];
+    window.fondosSync.setPresenceName=async name=>{window.fondosSync.displayName=(name||'').trim().slice(0,24);if(window.fondosSync.presenceConnected)await set(myPresenceRef,{name:window.fondosSync.displayName})};
+    window.addEventListener('fondos-presence-name',event=>{window.fondosSync.setPresenceName(event.detail?.name||'').catch(error=>console.warn('No se pudo actualizar el nombre visible',error))});
+    onValue(connectedRef,snapshot=>{window.fondosSync.presenceConnected=snapshot.val()===true;if(!window.fondosSync.presenceConnected)return;onDisconnect(myPresenceRef).remove().then(()=>set(myPresenceRef,{name:window.fondosSync.displayName||''})).catch(error=>console.warn('No se pudo activar presencia',error))});
+    onValue(presenceRoomRef,snapshot=>{window.fondosSync.connectedPeople=Object.entries(snapshot.val()||{}).map(([id,person])=>({id,name:(person?.name||'').trim()}));window.dispatchEvent(new Event('fondos-presence'))});
+    window.addEventListener('beforeunload',()=>{remove(myPresenceRef).catch(()=>{})},{once:true});
+    window.fondosSync.update=async updater=>{const result=await runTransaction(roomRef,current=>updater(current||null));return result.snapshot.val()};
+    window.fondosSync.timestamp=serverTimestamp;
+    onValue(roomRef,snapshot=>{const previous=window.fondosSync.state,next=snapshot.val();window.fondosSync.state=next;if(window.fondosSync.ready&&window.isSameActiveRound?.(previous,next)){if(location.hash.slice(1)==='votacion')upd();else window.refreshProvinceLiveState?.(next);return;}window.fondosSync.ready=true;window.fondosSync.status='Conectado · sala '+window.fondosSync.room;if(!snapshot.exists())window.fondosSync.update(current=>current||{stats:{},drawn:[],history:[]}).catch(error=>{window.fondosSync.status='No se pudo iniciar la sala: '+error.message;window.dispatchEvent(new Event('fondos-sync'))});window.dispatchEvent(new Event('fondos-sync'))},error=>{window.fondosSync.status='Error de conexión: '+error.message;window.dispatchEvent(new Event('fondos-sync'))});
+  } catch(error) { window.fondosSync.status='Error de conexión: '+error.message;window.dispatchEvent(new Event('fondos-sync')) }
+})();
+</script>
+
+<div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="otitle">
+  <div class="big" id="big">
+    <button class="x" type="button" id="close" aria-label="Cerrar noticia">X</button>
+    <div class="em" id="oem"></div><h2 id="otitle"></h2><p id="odesc"></p><div class="eff" id="oeff"></div><button class="btn" type="button" id="continue-news" style="display:none;margin-top:18px">Ver noticia</button>
+  </div>
+</div>
+
+<script>
+const P=[
+{id:'ba',n:'Buenos Aires',e:'🏙️',c:'#ff4fa3',cls:'Tanque urbano',max:30,s:{Población:10,Economía:10,Necesidad:8,Infraestructura:6,Recursos:8,'Influencia política':10,Gestión:5}},
+{id:'co',n:'Córdoba',e:'🚧',c:'#38f0ff',cls:'Mago logístico',max:40,s:{Población:8,Economía:8,Necesidad:5,Infraestructura:7,Recursos:6,'Influencia política':7,Gestión:8}},
+{id:'me',n:'Mendoza',e:'🍇',c:'#b57bff',cls:'Arquero del agua',max:40,s:{Población:6,Economía:7,Necesidad:5,Infraestructura:6,Recursos:8,'Influencia política':6,Gestión:7}},
+{id:'sa',n:'Salta',e:'⛰️',c:'#ffd23f',cls:'Explorador del norte',max:40,s:{Población:6,Economía:5,Necesidad:8,Infraestructura:5,Recursos:8,'Influencia política':5,Gestión:6}},
+{id:'mi',n:'Misiones',e:'🌿',c:'#5dff8a',cls:'Guardabosques',max:40,s:{Población:6,Economía:6,Necesidad:7,Infraestructura:5,Recursos:7,'Influencia política':5,Gestión:6}},
+{id:'tf',n:'Tierra del Fuego',e:'❄️',c:'#7fb4ff',cls:'Centinela austral',max:40,s:{Población:2,Economía:6,Necesidad:6,Infraestructura:5,Recursos:7,'Influencia política':4,Gestión:6}}
+];
+const EV=[
+{t:'Sequía histórica',e:'☀️',c:'#ffb347',d:'No llueve hace meses y el sector agrario cae un 80%. Faltan ingresos y crece la ayuda que necesitan los productores.',fx:{co:{Economía:-3},me:{Economía:-2},sa:{Economía:-1}}},
+{t:'Temporada récord en las Cataratas',e:'🌈',c:'#5dff8a',d:'El turismo en Iguazú sube un 60% y llegan visitantes de todo el mundo. Hay más ingresos, pero también más presión sobre el ambiente.',fx:{mi:{Economía:2}}},
+{t:'Se hunde la industria electrónica',e:'📉',c:'#ff5a5a',d:'Bajan los subsidios y las ventas de electrónica caen un 60%. Peligran los empleos en la isla.',fx:{tf:{Infraestructura:-3,Economía:-2}}},
+{t:'Colapso del transporte en el AMBA',e:'🚆',c:'#ff4fa3',d:'Un paro y fallas de infraestructura frenan trenes y colectivos durante semanas. Millones de personas no llegan a trabajar.',fx:{ba:{Economía:-1,Infraestructura:-1}}},
+{t:'Inundaciones en el norte',e:'🌊',c:'#38f0ff',d:'Las lluvias cortan caminos rurales y aíslan comunidades. El turismo se frena y hacen falta obras urgentes.',fx:{sa:{Infraestructura:-2},mi:{Infraestructura:-2}}},
+{t:'Plan de rutas federales',e:'🛣️',c:'#ffd23f',d:'Comienza un plan de obras para conectar regiones y facilitar el transporte de bienes y personas.',fx:{co:{Infraestructura:2,Gestión:1},sa:{Infraestructura:1}}},
+{t:'Boom del litio',e:'🔋',c:'#b57bff',d:'La demanda internacional de litio impulsa inversiones y exportaciones en el norte, aunque también crece la presión sobre los recursos.',fx:{sa:{Economía:2},me:{Economía:1}}},
+{t:'Incendios en la selva',e:'🔥',c:'#ff5a5a',d:'Una ola de calor y los focos de incendio afectan áreas naturales y comunidades. Se necesitan recursos para responder.',fx:{mi:{Infraestructura:-2,Gestión:-1}}},
+{t:'Vendimia de exportación',e:'🍷',c:'#ff4fa3',d:'Una cosecha de gran calidad abre nuevos mercados para el vino y genera ingresos en la región.',fx:{me:{Economía:2},ba:{Economía:1}}},
+{t:'Parque eólico austral',e:'🌬️',c:'#7fb4ff',d:'Se inaugura un parque eólico en el sur. Aumenta la energía disponible y se crean oportunidades de empleo local.',fx:{tf:{Infraestructura:2,Economía:1}}}
+];
+const ACTION_CARDS=[
+{id:'construir-casas',e:'🏠',t:'Construir casas',d:'Construye una casa pequeña para la provincia.',cost:100000,fx:{Infraestructura:1}}
+];
+function dealActionHands(){return Object.fromEntries(P.map(p=>[p.id,Array(3).fill(ACTION_CARDS[0].id)]))}
+const TOPICS=[
+{t:'Producción agrícola',e:'🌾',d:'En esta ronda se reparte el presupuesto para apoyar la producción agrícola, el trabajo rural y las economías regionales.'},
+{t:'Turismo y conservación',e:'🌿',d:'En esta ronda se decide cuánto invertir en turismo, cuidado de áreas naturales y desarrollo local sostenible.'},
+{t:'Industria y empleo',e:'🏭',d:'En esta ronda el presupuesto busca sostener la industria, proteger empleos y mejorar la capacidad productiva.'},
+{t:'Transporte e infraestructura',e:'🛣️',d:'En esta ronda se priorizan rutas, transporte y obras que conectan a las comunidades.'},
+{t:'Desarrollo del norte',e:'🧭',d:'En esta ronda el dinero se distribuye para atender necesidades y oportunidades de las provincias del norte.'},
+{t:'Conectividad federal',e:'🚧',d:'En esta ronda se busca reducir distancias con infraestructura y mejores conexiones entre provincias.'},
+{t:'Energía y minería responsable',e:'🔋',d:'En esta ronda se ponderan la producción de energía, los recursos naturales y el cuidado de las comunidades.'},
+{t:'Protección ambiental',e:'🌳',d:'En esta ronda se asignan fondos para prevenir daños ambientales y responder ante emergencias.'},
+{t:'Exportaciones regionales',e:'🍇',d:'En esta ronda se considera cómo impulsar la producción regional y abrir mercados para sus productos.'},
+{t:'Energía y desarrollo austral',e:'🌬️',d:'En esta ronda se priorizan oportunidades, servicios e infraestructura para el desarrollo del sur.'}
+];
+const SL={ba:'buenosaires',co:'cordoba',me:'mendoza',sa:'salta',mi:'misiones',tf:'tierradelfuego'};
+const BUDGET_STEP=2500,BUDGET_UNITS=40,BUDGET_TOTAL=BUDGET_STEP*BUDGET_UNITS;
+const money=n=>'US$ '+new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(n);
+let voteHTML='';
+const $=s=>document.querySelector(s);
+const STAT_ORDER=['Población','Economía','Infraestructura','Recursos','Influencia política','Gestión','Necesidad'];
+function deriveNeed(stats){const sum=STAT_ORDER.slice(0,-1).reduce((total,key)=>total+(Number(stats[key])||0),0);return Math.max(0,Math.min(10,Math.floor((60-sum)/6)))}
+const formatStat=value=>String(value);
+function statBar(value){return Array.from({length:10},(_,i)=>`<i class="${i<value?'on':''}"></i>`).join('')}
+function recordNeedChange(id,stats,changes,display){const before=Number(stats.Necesidad)||0,after=deriveNeed(stats);stats.Necesidad=after;if(after!==before){const delta=after-before;changes.push({stat:'Necesidad',delta,before,after});if(display)display.push(`<span class="${delta>0?'up':'dn'}">${P.find(p=>p.id===id)?.n||id}: Necesidad informativa ${delta>0?'+':''}${formatStat(delta)}</span>`)}}
+function previewCardEffects(province,card,state){const id=province.id,capital=state.capitals?.[id]??BASE_CAPITALS[id],before={...(state.stats?.[id]||province.s),Economía:Math.floor(capital/ECONOMY_POINT_VALUE)},after={...before};let nextCapital=Math.max(0,capital-(card.cost||0));after.Economía=Math.floor(nextCapital/ECONOMY_POINT_VALUE);Object.entries(card.fx).forEach(([stat,delta])=>{if(stat==='Necesidad')return;if(stat==='Economía'){nextCapital=Math.max(0,nextCapital+delta*ECONOMY_POINT_VALUE);after[stat]=Math.floor(nextCapital/ECONOMY_POINT_VALUE)}else if(stat==='Gestión'){const base=Number(state.managementBase?.[id]??before.Gestión)+delta;after.Gestión=Math.max(0,base-Math.floor(Math.max(0,nextCapital-(BASE_CAPITALS[id]||0))/ECONOMY_POINT_VALUE));state={...state,managementBase:{...(state.managementBase||{}),[id]:base}}}else after[stat]=Math.max(0,(before[stat]||0)+delta)});after.Recursos=(Number(after.Infraestructura)||0)+(Number(after.Economía)||0);const baseGestion=Number(state.managementBase?.[id]??before.Gestión),excess=Math.max(0,nextCapital-(BASE_CAPITALS[id]||0));after.Gestión=Math.max(0,baseGestion-Math.floor(excess/ECONOMY_POINT_VALUE));after.Necesidad=deriveNeed(after);const affectedStats=new Set([...(card.cost?['Economía']:[]),...Object.keys(card.fx).filter(stat=>stat!=='Necesidad')]);if(after.Recursos!==before.Recursos)affectedStats.add('Recursos');if(after.Gestión!==before.Gestión)affectedStats.add('Gestión');const effects=[...affectedStats].map(stat=>[stat,before[stat]||0,after[stat]||0]);if(after.Necesidad!==before.Necesidad)effects.push(['Necesidad informativa',before.Necesidad,after.Necesidad]);return effects.map(([stat,oldValue,newValue])=>{const delta=newValue-oldValue;return `<span class="${delta>=0?'up':'dn'}">${stat}: ${delta>0?'+':''}${formatStat(delta)} (${formatStat(oldValue)} → ${formatStat(newValue)})</span>`}).join('')}
+const BASE=P.map(p=>{const stats=Object.fromEntries(STAT_ORDER.map(stat=>[stat,stat==='Necesidad'?0:p.s[stat]]));stats.Infraestructura=(Number(stats.Infraestructura)||0)+(Number(stats.Población)||0);stats.Recursos=(Number(stats.Infraestructura)||0)+(Number(stats.Economía)||0);stats.Necesidad=deriveNeed(stats);return stats});
+const economies=BASE.map(s=>s.Economía),minEconomy=Math.min(...economies),maxEconomy=Math.max(...economies);
+const ECONOMY_POINT_VALUE=12500,CAPITAL_VERSION=3,NEED_VERSION=2,ACTION_HAND_VERSION=3,PROVINCE_RULES_VERSION=1,HOUSE_LAYOUT_VERSION=2,HOUSE_COST_VERSION=1,HOUSE_LEVEL_VERSION=1,HOUSE_HEALTH_VERSION=1,ROUND_DURATION=5*60*1000;
+const BASE_CAPITALS=Object.fromEntries(P.map((p,i)=>[p.id,BASE[i].Economía*ECONOMY_POINT_VALUE]));
+const HOUSE_SPOTS=[[8,41],[25,41],[42,41],[59,41],[76,41],[93,41],[8,51],[25,51],[42,51],[59,51],[76,51],[93,51],[8,75],[25,75],[42,75],[59,75],[76,75],[93,75]];
+function dealHouseLayouts(){
+  const layouts={};
+  P.forEach((province,index)=>{
+    const count=Math.max(0,Math.floor(Number(BASE[index]?.['Población'])||0)-1),spots=[...HOUSE_SPOTS],selected=[];
+    for(let i=spots.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[spots[i],spots[j]]=[spots[j],spots[i]]}
+    for(const spot of spots){
+      if(selected.every(([x,y])=>Math.hypot((x-spot[0])*.01,(y-spot[1])*.00823)>=.135))selected.push(spot);
+      if(selected.length===count)break;
+    }
+    layouts[province.id]=selected.length===count?selected:spots.slice(0,count);
+  });
+  return layouts;
+}
+function initialHouseSpots(id){const province=P.find(item=>item.id===id),index=P.indexOf(province),count=Math.max(0,Math.floor(Number(BASE[index]?.Población)||0)-1);return HOUSE_SPOTS.filter((_,spotIndex)=>spotIndex%2===0).slice(0,count)}
+function initialHouseLevels(id,count=initialHouseSpots(id).length){const population=Math.max(0,Math.floor(Number(BASE[P.findIndex(item=>item.id===id)]?.Población)||0)),levels=Array.from({length:count},()=>1);if(population>=2&&levels.length)levels[0]=2;return levels}
+function houseMaxHealth(level){return Number(level)>=2?25:10}
+function initialAllHouseLevels(layouts=dealHouseLayouts()){return Object.fromEntries(P.map(p=>[p.id,initialHouseLevels(p.id,(layouts[p.id]||[]).length)]))}
+function initialAllHouseHealth(layouts,levels){return Object.fromEntries(P.map(p=>[p.id,(layouts[p.id]||[]).map((_,index)=>houseMaxHealth(levels[p.id]?.[index]))]))}
+function findAvailableHouseSpot(existing){
+  for(let attempt=0;attempt<250;attempt++){
+    const x=+(6+Math.random()*88).toFixed(1),y=+(Math.random()<.76?40+Math.random()*13:68+Math.random()*18).toFixed(1);
+    if(existing.every(([oldX,oldY],index)=>Math.hypot((x-oldX)*.01,(y-oldY)*.00823)>=(index===0?.16:.135)))return [x,y];
+  }
+  return null;
+}
+const vals=Object.fromEntries(P.map(p=>[p.id,0]));
+let deck=[],drawn=[],chgs={},provinceBirdTimer=null,provinceTrailTimer=null,provincePersonTimer=null,provincePersonDirection='from-left';
+const LOCAL_KEY='fondos-nacion-estado-v1';
+function migrateState(state){
+  const next=state||{},stats={...Object.fromEntries(P.map((p,i)=>[p.id,{...BASE[i]}])),...(next.stats||{})};
+  const houseLayouts=Number(next.houseLayoutVersion)>=HOUSE_LAYOUT_VERSION?next.houseLayouts||{}:Object.fromEntries(Object.entries(next.houseLayouts||{}).map(([id,spots])=>[id,(spots||[]).map(([x,y])=>[x,Number(y)<60?Math.min(53,Math.max(40,Number(y)+8)):Math.min(86,Math.max(68,Number(y)+6))]) ]));
+  const houseCosts={...Object.fromEntries(P.map(p=>[p.id,100000])),...(next.houseCosts||{})};
+  if(Number(next.houseCostVersion)!==HOUSE_COST_VERSION)P.forEach(p=>{const purchases=(next.actionHistory||[]).filter(entry=>entry.province===p.id&&(entry.card==='construir-casas'||entry.cardName==='Construir casas')).length,initialCount=initialHouseSpots(p.id).length,extraHouses=Math.max(0,(next.houseLayouts?.[p.id]?.length||initialCount)-initialCount),purchaseCount=Math.max(purchases,extraHouses);houseCosts[p.id]=100000*(2**purchaseCount)});
+  const houseLayoutsForLevels=next.houseLayouts||{},houseLevels=Number(next.houseLevelVersion)>=HOUSE_LEVEL_VERSION?next.houseLevels||{}:Object.fromEntries(P.map(p=>[p.id,initialHouseLevels(p.id,(houseLayoutsForLevels[p.id]||initialHouseSpots(p.id)).length)]));
+  const houseHealth=Object.fromEntries(P.map(p=>{const spots=houseLayouts[p.id]||initialHouseSpots(p.id),levels=houseLevels[p.id]||initialHouseLevels(p.id,spots.length),old=next.houseHealth?.[p.id]||[];return [p.id,spots.map((_,index)=>{const max=houseMaxHealth(levels[index]),value=Number(next.houseHealthVersion)>=HOUSE_HEALTH_VERSION&&Number.isFinite(Number(old[index]))?Number(old[index]):max;return Math.max(0,Math.min(max,value))})]}));
+  let capitals={...BASE_CAPITALS,...(next.capitals||{})},capitalHistory=next.capitalHistory||[];
+  const managementBase={...Object.fromEntries(P.map((p,i)=>[p.id,BASE[i].Gestión])),...(next.managementBase||{})};
+  if(next.capitalVersion!==CAPITAL_VERSION){
+    capitals={...BASE_CAPITALS};capitalHistory=[];
+    Object.entries(next.allocations||{}).forEach(([round,allocation])=>P.forEach(p=>{const amount=Number(allocation?.[p.id])||0;if(next.confirmedRounds?.[round]&&amount){capitals[p.id]+=amount;capitalHistory.push({province:p.id,round:+round,amount,at:Date.now(),kind:'reparto'})}}));
+    P.forEach((p,i)=>{const previousEconomy=Number(next.stats?.[p.id]?.Economía);if(Number.isFinite(previousEconomy)&&previousEconomy!==BASE[i].Economía){const amount=(previousEconomy-BASE[i].Economía)*ECONOMY_POINT_VALUE;capitals[p.id]=Math.max(0,capitals[p.id]+amount);capitalHistory.push({province:p.id,round:next.round||0,amount,at:Date.now(),kind:'migracion'})}});
+  }
+  P.forEach((p,index)=>{stats[p.id]={...BASE[index],...(stats[p.id]||{})};if(next.provinceRulesVersion!==PROVINCE_RULES_VERSION&&next.stats?.[p.id]){stats[p.id].Infraestructura=(Number(stats[p.id].Infraestructura)||0)+(Number(BASE[index].Población)||0);managementBase[p.id]=Number(next.stats[p.id].Gestión??BASE[index].Gestión)}if(Number(next.houseLevelVersion)!==HOUSE_LEVEL_VERSION){const extraHouses=Math.max(0,(houseLayoutsForLevels[p.id]?.length||initialHouseSpots(p.id).length)-initialHouseSpots(p.id).length);stats[p.id].Población=(Number(stats[p.id].Población)||0)+extraHouses}stats[p.id].Economía=Math.floor((Number(capitals[p.id])||0)/ECONOMY_POINT_VALUE);stats[p.id].Recursos=(Number(stats[p.id].Infraestructura)||0)+stats[p.id].Economía;const excess=Math.max(0,(Number(capitals[p.id])||0)-(Number(BASE_CAPITALS[p.id])||0));stats[p.id].Gestión=Math.max(0,(Number(managementBase[p.id])||0)-Math.floor(excess/ECONOMY_POINT_VALUE));stats[p.id].Necesidad=deriveNeed(stats[p.id])});
+  const actionUses={...(next.actionUses||{})},cleanHistory=entries=>(entries||[]).map(entry=>({...entry,changes:(entry.changes||[]).filter(change=>next.needVersion===NEED_VERSION||change.stat!=='Necesidad')})),history=cleanHistory(next.history),actionHistory=cleanHistory(next.actionHistory);
+  (next.investmentHistory||[]).forEach(entry=>{if(entry.province&&entry.round&&!actionUses[entry.province]?.[entry.round])actionUses[entry.province]={...(actionUses[entry.province]||{}),[entry.round]:'infra'}});
+  const round=Math.min(Number(next.round??next.drawn?.length??0),10),roundStartedAt=round>0?(Number(next.roundStartedAt)||Date.now()):null;
+  return {...next,capitalVersion:CAPITAL_VERSION,needVersion:NEED_VERSION,provinceRulesVersion:PROVINCE_RULES_VERSION,houseLayoutVersion:HOUSE_LAYOUT_VERSION,houseLayouts,houseCostVersion:HOUSE_COST_VERSION,houseCosts,houseLevelVersion:HOUSE_LEVEL_VERSION,houseLevels,houseHealthVersion:HOUSE_HEALTH_VERSION,houseHealth,acidHouseDamageAt:next.acidHouseDamageAt||{},roundStartedAt,managementBase,stats,capitals,capitalHistory,history,actionUses,actionHistory,actionHands:next.actionHands||{},actionHandVersion:next.actionHandVersion||1,nextHouseCost:Math.max(100000,Number(next.nextHouseCost)||100000),investmentUsed:next.investmentUsed||{},investmentHistory:next.investmentHistory||[]};
+}
+function roundRemainingMs(state,now=Date.now()){const round=Math.min(Number(state?.round??state?.drawn?.length??0),10),started=Number(state?.roundStartedAt)||0;if(!round||!started)return ROUND_DURATION;return Math.max(0,ROUND_DURATION-(now-started))}
+function isRoundPaused(state,now=Date.now()){return !!state&&!state.ended&&Math.min(Number(state.round??state.drawn?.length??0),10)>0&&roundRemainingMs(state,now)<=0}
+function updateRoundClock(now=Date.now()){
+  const state=window.fondosSync?.state||{},round=Math.min(Number(state.round??state.drawn?.length??0),10),timer=$('#round-timer-hud'),value=$('#round-timer-value'),onProvince=!!document.querySelector('.province-page'),paused=onProvince&&isRoundPaused(state,now);
+  if(timer){timer.hidden=!round||!!state.ended;if(round&&!state.ended&&value){const remaining=roundRemainingMs(state,now),seconds=remaining<=0?0:Math.ceil(remaining/1000);value.textContent=`${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`}}
+  document.body.classList.toggle('round-paused',paused);$('#round-expired-overlay')?.classList.toggle('show',paused);
+  if(paused){if(provinceBirdTimer!==null)clearTimeout(provinceBirdTimer);if(provinceTrailTimer!==null)clearInterval(provinceTrailTimer);if(provincePersonTimer!==null)clearTimeout(provincePersonTimer);provinceBirdTimer=null;provinceTrailTimer=null;provincePersonTimer=null}
+  return paused;
+}
+function accrueHouseIncome(raw,now=Date.now()){
+  const current=raw||{};
+  if(current.ended||Math.min(Number(current.round??current.drawn?.length??0),10)<=0)return current;
+  const last=Number(current.houseIncomeAt)||0;
+  if(!last)return {...current,houseIncomeAt:now,houseIncomeEvents:current.houseIncomeEvents||{}};
+  const incomeUntil=Math.min(now,(Number(current.roundStartedAt)||now)+ROUND_DURATION),seconds=Math.floor((incomeUntil-last)/1000);
+  if(seconds<=0)return current;
+  const state=migrateState(current),capitals={...BASE_CAPITALS,...state.capitals},stats={...state.stats},events={...(state.houseIncomeEvents||{})};
+  P.forEach((province,index)=>{
+    const houseCount=(state.houseLayouts?.[province.id]||initialHouseSpots(province.id)).length,levels=state.houseLevels?.[province.id]||initialHouseLevels(province.id,houseCount),rate=levels.reduce((total,level)=>total+(Number(level)>=2?250:125),0),amount=rate*seconds;
+    if(!amount)return;
+    capitals[province.id]=(Number(capitals[province.id])||0)+amount;
+    const updated={...stats[province.id],Economía:Math.floor(capitals[province.id]/ECONOMY_POINT_VALUE)};
+    updated.Recursos=(Number(updated.Infraestructura)||0)+updated.Economía;
+    const excess=Math.max(0,capitals[province.id]-(Number(BASE_CAPITALS[province.id])||0));
+    updated.Gestión=Math.max(0,(Number(state.managementBase?.[province.id])||0)-Math.floor(excess/ECONOMY_POINT_VALUE));
+    updated.Necesidad=deriveNeed(updated);stats[province.id]=updated;
+    events[province.id]={amount:rate,total:amount,seconds,at:now};
+  });
+  return {...state,capitals,stats,houseIncomeAt:last+seconds*1000,houseIncomeEvents:events};
+}
+function refreshProvincePurchaseAvailability(state=window.fondosSync?.state||{}){
+  const page=document.querySelector('.province-page');if(!page)return;
+  const provinceId=page.dataset.provinceId,province=P.find(item=>item.id===provinceId);if(!province)return;
+  const round=Math.min(Number(state.round??state.drawn?.length??0),10),ended=!!state.ended,paused=isRoundPaused(state,Date.now()),capital=Number(state.capitals?.[provinceId]??BASE_CAPITALS[provinceId])||0;
+  const houses=state.houseLayouts?.[provinceId]||initialHouseSpots(provinceId),cost=Math.max(100000,Number(state.houseCosts?.[provinceId])||100000);
+  page.querySelectorAll('.province-card[data-action]').forEach(button=>{
+    const card=ACTION_CARDS.find(item=>item.id===button.dataset.action);if(!card)return;
+    const enoughStats=Object.entries(card.fx).every(([stat,delta])=>delta>=0||(stat==='Economía'?capital>=-delta*ECONOMY_POINT_VALUE:(Number(state.stats?.[provinceId]?.[stat]??province.s[stat])||0)>=-delta));
+    const available=!ended&&!paused&&round>0&&houses.length<10&&capital>=cost&&enoughStats;
+    const reason=ended?'La partida terminó':paused?'Esperá a que comience la siguiente ronda':round===0?'Empezá la partida para usar las cartas':houses.length>=10?'Ya alcanzaste el máximo de 10 casas':capital<cost||!enoughStats?'No alcanza el capital':'Disponible para usar.';
+    button.disabled=!available;button.classList.toggle('ready',available);button.classList.toggle('unavailable',!available);button.setAttribute('aria-label',`${card.t}. ${reason}`);
+  });
+  if(pendingHouseUpgrade?.provinceId===provinceId&&!$('#house-upgrade-prompt')?.hidden){
+    const index=pendingHouseUpgrade.index,levels=state.houseLevels?.[provinceId]||initialHouseLevels(provinceId,houses.length),level=Number(levels[index])||1,button=$('#house-upgrade-confirm');
+    if(button)button.disabled=level>=2||round===0||ended||paused||capital<100000;
+    const description=$('#house-upgrade-description');
+    if(description){let message=level>=2?'Esta casa ya está en nivel 2.':'Mejorala al nivel 2 por $100.000. Generará $250 por segundo y sumará 1 punto adicional de población e infraestructura.';if(round===0)message+=' Inicia la partida para mejorar casas.';else if(paused)message+=' Esperá a que comience la siguiente ronda.';else if(capital<100000)message+=' No alcanza el dinero disponible.';description.textContent=message}
+  }
+}
+function tickHouseIncome(){
+  const sync=window.fondosSync,now=Date.now(),source=sync.state||{},round=Number(source.round??source.drawn?.length??0),paused=updateRoundClock(now);
+  if(!round||source.ended)return;
+  if(!Number(source.houseIncomeAt)){
+    if(sync?.ready&&sync.update){sync.update(raw=>{const current=raw||{};return current.ended||Number(current.round??current.drawn?.length??0)<=0||Number(current.houseIncomeAt)?current:{...current,houseIncomeAt:now,houseIncomeEvents:current.houseIncomeEvents||{}}}).then(state=>{sync.state=state}).catch(error=>{sync.status='No se pudo iniciar el ingreso de las casas: '+error.message});return}
+    sync.state={...source,houseIncomeAt:now,houseIncomeEvents:source.houseIncomeEvents||{}};saveLocalState();return;
+  }
+  const projected=accrueHouseIncome(source,now),hash=location.hash.slice(1),province=P.find(item=>SL[item.id]===hash),page=document.querySelector('.province-page');
+  if(!province||!page)return;
+  refreshProvincePurchaseAvailability(projected);
+  const capital=projected.capitals?.[province.id]??BASE_CAPITALS[province.id],moneyLabel=page.querySelector('.province-hud-money strong');
+  if(moneyLabel)moneyLabel.textContent=new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(capital);
+  const stats=projected.stats?.[province.id]||BASE[P.findIndex(item=>item.id===province.id)];
+  page.querySelectorAll('.province-stat').forEach(row=>{const value=row.querySelector('strong');if(value&&row.dataset.stat in stats)value.textContent=formatStat(stats[row.dataset.stat])});
+  if(Number(projected.houseIncomeAt)>Number(source.houseIncomeAt)){
+    const event=projected.houseIncomeEvents?.[province.id];if(!event)return;
+    const old=page.querySelector('.province-money-gain');old?.remove();
+    const gain=document.createElement('b');gain.className='province-money-gain';gain.setAttribute('aria-label',`Ganaste ${new Intl.NumberFormat('es-AR').format(event.amount)} por segundo`);gain.textContent=`+${new Intl.NumberFormat('es-AR').format(event.amount)}`;page.querySelector('.province-hud-money')?.append(gain);
+  }
+  if(paused)return;
+}
+function ensureCurrentActionHands(raw){const state=migrateState(raw||{}),round=Math.min(state.round??state.drawn?.length??0,10);if(!round)return {...state,actionHandVersion:ACTION_HAND_VERSION};if(state.actionHandVersion===ACTION_HAND_VERSION&&state.actionHands?.[round]&&P.every(p=>state.actionHands[round][p.id]?.length===3))return state;return {...state,actionHandVersion:ACTION_HAND_VERSION,actionHands:{...state.actionHands,[round]:dealActionHands()}}}
+function saveLocalState(){const state=migrateState(window.fondosSync.state||{});window.fondosSync.state=state;P.forEach(p=>p.s={...state.stats[p.id]});localStorage.setItem(LOCAL_KEY,JSON.stringify({...state,drawn:state.drawn||drawn,round:Math.min(state.round??drawn.length,10),ended:!!state.ended}))}
+function loadLocalState(){try{const saved=JSON.parse(localStorage.getItem(LOCAL_KEY)||'null');if(saved){const migrated=migrateState(saved);drawn=migrated.drawn||[];P.forEach(p=>p.s={...migrated.stats[p.id]});window.fondosSync.state={...(window.fondosSync.state||{}),...migrated,round:saved.round||0,ended:!!saved.ended,history:saved.history||[],allocations:saved.allocations||{},confirmedRounds:saved.confirmedRounds||{}}}}catch(error){console.warn('No se pudo leer el estado local',error)}}
+function newDeck(){deck=EV.map((_,i)=>i).sort(()=>Math.random()-.5);drawn=[];chgs={};P.forEach((p,i)=>p.s={...BASE[i]})}
+newDeck();
+function createProvinceAcidRainSchedule(roundStartedAt){
+  const durations=Array.from({length:3},()=>30000+Math.floor(Math.random()*30001)),minimumGap=12000,freeTime=ROUND_DURATION-durations.reduce((sum,duration)=>sum+duration,0)-minimumGap*(durations.length-1),weights=Array.from({length:durations.length+1},()=>Math.random()+.15),weightSum=weights.reduce((sum,weight)=>sum+weight,0),gaps=weights.map(weight=>Math.floor(freeTime*weight/weightSum));
+  gaps[gaps.length-1]+=freeTime-gaps.reduce((sum,gap)=>sum+gap,0);
+  let cursor=gaps[0];const events=durations.map((duration,index)=>{const event={offset:cursor,duration};cursor+=duration+(index<durations.length-1?minimumGap+gaps[index+1]:0);return event});
+  return {roundStartedAt,events};
+}
+function getProvinceAcidRainSchedule(state,provinceId,startedAt=Number(state?.roundStartedAt)||0){
+  let schedule=Number(state.acidRainSchedules?.[provinceId]?.roundStartedAt)===startedAt?state.acidRainSchedules[provinceId]:null;
+  const key=`fondos-acid-rain-v2:${startedAt}:${provinceId}`;
+  if(!schedule)try{schedule=JSON.parse(sessionStorage.getItem(key)||'null')}catch{}
+  if(!schedule||!Array.isArray(schedule.events)||schedule.events.length!==3||schedule.events.some(event=>!Number.isFinite(event.offset)||!Number.isFinite(event.duration))){schedule=createProvinceAcidRainSchedule(startedAt);try{sessionStorage.setItem(key,JSON.stringify(schedule))}catch{}}
+  return schedule;
+}
+function getActiveProvinceAcidEvent(state,provinceId,now=Date.now()){
+  const startedAt=Number(state?.roundStartedAt)||0;if(!startedAt||state?.ended||roundRemainingMs(state,now)<=0)return null;
+  const schedule=getProvinceAcidRainSchedule(state,provinceId,startedAt);
+  return schedule.events.find(event=>now>=startedAt+event.offset&&now<startedAt+event.offset+event.duration&&now<startedAt+ROUND_DURATION)||null;
+}
+function updateHouseHealthBars(state){
+  const page=document.querySelector('.province-page');if(!page)return;
+  const id=page.dataset.provinceId,spots=state.houseLayouts?.[id]||initialHouseSpots(id),levels=state.houseLevels?.[id]||initialHouseLevels(id,spots.length),health=state.houseHealth?.[id]||spots.map((_,index)=>houseMaxHealth(levels[index]));
+  page.querySelectorAll('.province-house-wrap').forEach(button=>{const index=Number(button.dataset.upgradeHouse),maximum=houseMaxHealth(levels[index]),current=Math.max(0,Number(health[index])||0),fill=button.querySelector('.province-house-health i');if(fill)fill.style.setProperty('--health',`${100*current/maximum}%`);button.setAttribute('aria-label',`Casa nivel ${Number(levels[index])>=2?2:1}, ${current} de ${maximum} puntos de vida, genera $${Number(levels[index])>=2?250:125} por segundo. Tocar para mejorar`) });
+}
+window.updateProvinceHouseHealth=updateHouseHealthBars;
+window.isSameActiveRound=(before,after)=>!!before&&!!after&&Number(before.round??before.drawn?.length??0)===Number(after.round??after.drawn?.length??0)&&Number(before.roundStartedAt||0)===Number(after.roundStartedAt||0)&&!!before.ended===!!after.ended&&JSON.stringify(before.drawn||[])===JSON.stringify(after.drawn||[]);
+function provinceHouseMarkup(province,state){
+  const id=province.id,spots=state.houseLayouts?.[id]||initialHouseSpots(id),levels=state.houseLevels?.[id]||initialHouseLevels(id,spots.length),health=state.houseHealth?.[id]||spots.map((_,index)=>houseMaxHealth(levels[index]));
+  return spots.map(([x,y],index)=>{const isLarge=Number(levels[index])>=2,image=isLarge?'casa2.png':'casa1.png',income=isLarge?250:125,maximum=houseMaxHealth(levels[index]),currentHealth=Math.max(0,Number(health[index])||0),healthPercent=100*currentHealth/maximum;return `<button class="province-house-wrap ${isLarge?'is-large':''}" type="button" data-upgrade-house="${index}" aria-label="Casa nivel ${isLarge?2:1}, ${currentHealth} de ${maximum} puntos de vida, genera $${income} por segundo. Tocar para mejorar" style="--house-x:${x}%;--house-y:${y}%;z-index:${Math.round(y)}"><b class="province-house-income">$${new Intl.NumberFormat('es-AR').format(income)}/s</b><img class="province-house" src="assets/${image}" alt=""><span class="province-house-health" aria-label="${currentHealth} de ${maximum} puntos de vida"><i style="--health:${healthPercent}%"></i></span></button>`}).join('');
+}
+function refreshProvinceLiveState(state){
+  const page=document.querySelector('.province-page');if(!page)return;
+  const id=page.dataset.provinceId,province=P.find(item=>item.id===id);if(!province)return;
+  const houseLayer=page.querySelector('.province-houses-layer');if(houseLayer)houseLayer.innerHTML=provinceHouseMarkup(province,state);
+  const stats=state.stats?.[id]||province.s,capital=Number(state.capitals?.[id]??BASE_CAPITALS[id])||0;
+  const round=Math.min(Number(state.round??state.drawn?.length??0),10),roundValue=page.querySelector('.province-hud-item:first-child strong'),moneyValue=page.querySelector('.province-hud-money strong'),populationValue=page.querySelector('.province-hud-population strong');
+  if(roundValue)roundValue.textContent=round;if(moneyValue)moneyValue.textContent=new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(capital);if(populationValue)populationValue.textContent=stats.Población??0;
+  page.querySelectorAll('.province-stat').forEach(row=>{const value=row.querySelector('strong');if(value&&row.dataset.stat in stats)value.textContent=formatStat(stats[row.dataset.stat])});
+  const cost=Math.max(100000,Number(state.houseCosts?.[id])||100000);page.querySelectorAll('.province-cost').forEach(label=>label.textContent=`${new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(cost)}$`);
+  refreshProvincePurchaseAvailability(state);
+}
+window.refreshProvinceLiveState=refreshProvinceLiveState;
+let acidHouseDamagePending=false;
+function tickAcidHouseDamage(){
+  const sync=window.fondosSync,state=sync?.state,now=Date.now();if(!state||!Number(state.round)||state.ended||roundRemainingMs(state,now)<=0||acidHouseDamagePending)return;
+  const hasDueProvince=P.some(province=>{const id=province.id,event=getActiveProvinceAcidEvent(state,id,now),spots=state.houseLayouts?.[id]||initialHouseSpots(id);if(!event||!spots.length)return false;const dueAfter=Math.max(Number(state.acidHouseDamageAt?.[id])||0,(Number(state.roundStartedAt)||now)+event.offset)+3000;return now>=dueAfter});
+  if(!hasDueProvince)return;
+  const damage=raw=>{
+    if(!raw)return raw;let current=migrateState(raw);if(current.ended||Number(current.roundStartedAt)!==Number(state.roundStartedAt)||roundRemainingMs(current,now)<=0)return raw;
+    let layouts={...(current.houseLayouts||{})},levels={...(current.houseLevels||{})},health={...(current.houseHealth||{})},damageAt={...(current.acidHouseDamageAt||{})},schedules={...(current.acidRainSchedules||{})},stats={...current.stats},changed=false;
+    const hits=[];
+    P.forEach(province=>{const id=province.id,event=getActiveProvinceAcidEvent(current,id,now),spots=layouts[id]||[];if(!event||!spots.length)return;const eventStarted=Number(current.roundStartedAt)+event.offset,dueAfter=Math.max(Number(damageAt[id])||0,eventStarted)+3000;if(now<dueAfter)return;const levelsForProvince=levels[id]||initialHouseLevels(id,spots.length),healthForProvince=health[id]||spots.map((_,index)=>houseMaxHealth(levelsForProvince[index])),candidates=spots.map((_,index)=>index).filter(index=>Number(healthForProvince[index])>0);if(!candidates.length)return;const index=candidates[Math.floor(Math.random()*candidates.length)];hits.push({id,index,eventStarted,levels:levelsForProvince,health:healthForProvince});if(!Number(current.acidRainSchedules?.[id]?.roundStartedAt))schedules[id]=getProvinceAcidRainSchedule(current,id)});
+    if(!hits.length)return raw;
+    const willDestroy=hits.some(hit=>Number(hit.health[hit.index])<=1);if(willDestroy)current=accrueHouseIncome(current,now);
+    layouts={...(current.houseLayouts||{})};levels={...(current.houseLevels||{})};health={...(current.houseHealth||{})};damageAt={...(current.acidHouseDamageAt||{})};stats={...current.stats};
+    hits.forEach(({id,index})=>{const spots=[...(layouts[id]||[])],levelsForProvince=[...(levels[id]||[])],healthForProvince=[...(health[id]||[])];if(!spots[index]||Number(healthForProvince[index])<=0)return;healthForProvince[index]=Math.max(0,Number(healthForProvince[index])-1);damageAt[id]=now;changed=true;if(healthForProvince[index]===0){const contribution=Number(levelsForProvince[index])>=2?2:1,provinceStats={...stats[id]},changes=[];for(const stat of ['Población','Infraestructura']){const before=Number(provinceStats[stat])||0;provinceStats[stat]=Math.max(0,before-contribution);if(provinceStats[stat]!==before)changes.push({stat,delta:provinceStats[stat]-before,before,after:provinceStats[stat]})}provinceStats.Recursos=(Number(provinceStats.Infraestructura)||0)+(Number(provinceStats.Economía)||0);if(provinceStats.Recursos!==(Number(stats[id].Recursos)||0))changes.push({stat:'Recursos',delta:provinceStats.Recursos-(Number(stats[id].Recursos)||0),before:Number(stats[id].Recursos)||0,after:provinceStats.Recursos});recordNeedChange(id,provinceStats,changes);stats[id]=provinceStats;spots.splice(index,1);levelsForProvince.splice(index,1);healthForProvince.splice(index,1)}layouts[id]=spots;levels[id]=levelsForProvince;health[id]=healthForProvince});
+    if(!changed)return raw;
+    return {...current,houseLayouts:layouts,houseLevels:levels,houseHealthVersion:HOUSE_HEALTH_VERSION,houseHealth:health,acidHouseDamageAt:damageAt,acidRainSchedules:schedules,stats,houseIncomeAt:willDestroy?now:current.houseIncomeAt};
+  };
+  if(sync.ready&&sync.update){acidHouseDamagePending=true;sync.update(damage).then(next=>{if(!sync.ready){sync.state=next;updateHouseHealthBars(next)}}).catch(error=>{sync.status='No se pudo aplicar el daño de la lluvia ácida: '+error.message}).finally(()=>{acidHouseDamagePending=false})}
+  else{sync.state=damage(state);saveLocalState();refreshProvinceLiveState(sync.state)}
+}
+function updateProvinceAcidRain(){
+  const page=document.querySelector('.province-page');if(!page)return;
+  const state=window.fondosSync?.state||{},provinceId=page.dataset.provinceId,round=Math.min(Number(state.round??state.drawn?.length??0),10),startedAt=Number(state.roundStartedAt)||0,now=Date.now();
+  if(!round||state.ended||!startedAt){page.classList.remove('acid-rain-active');page.querySelector('.province-acid-rain-layer')?.remove();return}
+  const key=`fondos-acid-rain-v2:${startedAt}:${provinceId}`,isActive=!!getActiveProvinceAcidEvent(state,provinceId,now);
+  let layer=page.querySelector('.province-acid-rain-layer');
+  if(!isActive){
+    page.classList.remove('acid-rain-active');
+    if(layer&&!layer.dataset.fading){layer.dataset.fading='true';layer.classList.remove('is-visible');window.setTimeout(()=>layer.remove(),1450)}
+    return;
+  }
+  page.classList.add('acid-rain-active');
+  if(layer?.dataset.roundKey===key){layer.dataset.fading='';layer.classList.add('is-visible');return}
+  layer?.remove();layer=document.createElement('div');layer.className='province-acid-rain-layer';layer.dataset.roundKey=key;layer.setAttribute('aria-hidden','true');
+  const darkener=document.createElement('div');darkener.className='province-acid-darkener';layer.append(darkener);
+  const clouds=document.createDocumentFragment();
+  for(let row=0;row<2;row++)for(let column=0;column<7;column++){
+    const cloud=document.createElement('img');cloud.className='province-acid-cloud';cloud.src='assets/nube.png';cloud.alt='';cloud.draggable=false;
+    cloud.style.setProperty('--cloud-x',`${column*18-5+(row%2?9:0)}%`);cloud.style.setProperty('--cloud-y',`${row*8-3}%`);cloud.style.setProperty('--cloud-time',`${7+Math.random()*5}s`);cloud.style.setProperty('--cloud-delay',`${-Math.random()*6}s`);clouds.append(cloud);
+  }
+  const drops=document.createElement('div');drops.className='province-acid-drops';
+  for(let i=0;i<58;i++){
+    const drop=document.createElement('i');drop.className='province-acid-drop';drop.style.setProperty('--drop-x',`${Math.random()*100}%`);drop.style.setProperty('--drop-y',`${Math.random()*24}%`);drop.style.setProperty('--drop-time',`${.42+Math.random()*.42}s`);drop.style.setProperty('--drop-delay',`${-Math.random()*.9}s`);drops.append(drop);
+  }
+  layer.append(drops,clouds);page.append(layer);requestAnimationFrame(()=>layer.classList.add('is-visible'));
+}
+function scheduleProvinceBird(delay=7000+Math.random()*4000){
+  if(provinceBirdTimer!==null)clearTimeout(provinceBirdTimer);
+  provinceBirdTimer=setTimeout(()=>{
+    provinceBirdTimer=null;
+    if(isRoundPaused(window.fondosSync?.state,Date.now()))return;
+    const layer=document.querySelector('.province-bird-layer');
+    if(!layer)return;
+    if(layer.querySelectorAll('.province-bird').length>=2){scheduleProvinceBird(3000+Math.random()*3000);return}
+    const fromLeft=Math.random()<.5,bird=document.createElement('span'),image=document.createElement('img');
+    bird.className=`province-bird ${fromLeft?'from-left':'from-right'}`;
+    bird.style.setProperty('--bird-top',`${(17+Math.random()*12).toFixed(1)}%`);
+    bird.style.setProperty('--bird-duration',`${Math.round(24000+Math.random()*12000)}ms`);
+    image.src='assets/bird.png';image.alt='';image.draggable=false;
+    bird.append(image);bird.addEventListener('animationend',event=>{if(event.target===bird)bird.remove()});layer.append(bird);
+    scheduleProvinceBird();
+  },delay);
+}
+function updateProvinceBirds(active){
+  if(isRoundPaused(window.fondosSync?.state,Date.now()))active=false;
+  if(!active){if(provinceBirdTimer!==null)clearTimeout(provinceBirdTimer);if(provinceTrailTimer!==null)clearInterval(provinceTrailTimer);provinceBirdTimer=null;provinceTrailTimer=null;return}
+  if(provinceBirdTimer===null)scheduleProvinceBird(1800+Math.random()*2600);
+  if(provinceTrailTimer===null)provinceTrailTimer=setInterval(emitProvinceBirdTrails,500);
+}
+function scheduleProvincePerson(delay=4500+Math.random()*1000){
+  if(provincePersonTimer!==null)clearTimeout(provincePersonTimer);
+  provincePersonTimer=setTimeout(()=>{
+    provincePersonTimer=null;
+    if(isRoundPaused(window.fondosSync?.state,Date.now()))return;
+    const layer=document.querySelector('.province-person-layer');
+    if(!layer)return;
+    if(layer.querySelectorAll('.province-person').length>=2){scheduleProvincePerson(2500+Math.random()*2500);return}
+    const direction=provincePersonDirection;provincePersonDirection=direction==='from-left'?'from-right':'from-left';
+    const person=document.createElement('span'),image=document.createElement('img');
+    person.className=`province-person ${direction}`;
+    person.style.setProperty('--person-duration',`${Math.round(18000+Math.random()*6000)}ms`);
+    image.src=Math.random()<.5?'assets/man.png':'assets/woman.png';image.alt='';image.draggable=false;
+    const usedNames=new Set();layer.querySelectorAll('.province-person-name').forEach(label=>{const key=(label.dataset.personName||label.textContent||'').trim().toLocaleLowerCase();if(!key)return;if(usedNames.has(key))label.remove();else usedNames.add(key)});
+    const availableNames=[...new Map((window.fondosSync?.connectedPeople||[]).map(person=>[(person.name||'').trim().toLocaleLowerCase(),(person.name||'').trim()]).filter(([key,name])=>key&&name&&!usedNames.has(key))).values()];
+    const assignedName=availableNames.length?availableNames[Math.floor(Math.random()*availableNames.length)]:'';
+    if(assignedName){const nameLabel=document.createElement('span');nameLabel.className='province-person-name';nameLabel.dataset.personName=assignedName;nameLabel.textContent=assignedName;person.append(nameLabel)}
+    let positioned=false;const positionOnPath=()=>{if(positioned)return;positioned=true;const layerWidth=layer.getBoundingClientRect().width||innerWidth,width=person.getBoundingClientRect().width||Math.max(18,Math.min(38,innerWidth*.03)),height=width*image.naturalHeight/image.naturalWidth,roadCenter=layerWidth*(903/1204),layerHeight=layerWidth*(1489/1204),variation=layerWidth*(Math.random()*.04-.013),topRatio=Math.max(0,(roadCenter-height+variation)/layerHeight);person.style.top=`${(topRatio*100).toFixed(2)}%`;person.style.zIndex=String(Math.round(topRatio*100))};
+    image.addEventListener('load',positionOnPath,{once:true});
+    person.append(image);layer.append(person);if(image.complete&&image.naturalWidth)positionOnPath();
+    person.addEventListener('animationend',event=>{if(event.target===person)person.remove()});
+    scheduleProvincePerson();
+  },delay);
+}
+function updateProvincePeople(active){
+  if(isRoundPaused(window.fondosSync?.state,Date.now()))active=false;
+  if(!active){if(provincePersonTimer!==null)clearTimeout(provincePersonTimer);provincePersonTimer=null;return}
+  if(provincePersonTimer===null)scheduleProvincePerson(1600+Math.random()*2400);
+}
+function emitProvinceBirdTrails(){
+  if(isRoundPaused(window.fondosSync?.state,Date.now()))return;
+  const layer=document.querySelector('.province-bird-layer');if(!layer)return;
+  const layerRect=layer.getBoundingClientRect();
+  layer.querySelectorAll('.province-bird').forEach(bird=>{
+    const image=bird.querySelector('img'),rect=image.getBoundingClientRect(),dot=document.createElement('i');
+    dot.className='province-bird-dot';
+    const behindCenter=rect.left+rect.width/2+(bird.classList.contains('from-left')?-4:4);
+    dot.style.left=`${behindCenter-layerRect.left}px`;
+    dot.style.top=`${rect.top+rect.height/2-layerRect.top}px`;
+    layer.append(dot);dot.addEventListener('animationend',()=>dot.remove(),{once:true});
+  });
+}
+loadLocalState();
+window.fondosSync.state=ensureCurrentActionHands(window.fondosSync.state||{});P.forEach(p=>p.s={...window.fondosSync.state.stats[p.id]});
+
+function gameHud(round,amount,ended=false,moneyLabel='DISPONIBLE'){
+  const completed=Math.max(0,Math.min(round,10));
+  return `<div class="game-hud-spacer" aria-hidden="true"></div><section class="game-hud" aria-label="Ronda ${completed} de 10. ${moneyLabel}: ${money(amount)}"><div class="game-hud-round"><div class="round-sign"><span class="round-sign-name">ROUND</span><b class="round-sign-number">${completed}</b><span class="round-sign-total">OF 10</span></div></div><div class="game-hud-money"><img src="assets/dinero-icon.png" alt=""><div><span class="game-hud-label">${moneyLabel}</span><b id="hud-money">${money(amount)}</b></div></div></section>`;
+}
+
+function provincePage(p){
+  const roundDrawn=window.fondosSync.state?.drawn||drawn;
+  const currentRound=Math.min(window.fondosSync.state?.round??roundDrawn.length,10),ended=!!window.fondosSync.state?.ended;
+  const state=accrueHouseIncome(window.fondosSync.state||{},Date.now()),capital=state.capitals?.[p.id]??BASE_CAPITALS[p.id],provinceStats=state.stats?.[p.id]||p.s;
+  const recentAction=[...(state.actionHistory||[])].reverse().find(entry=>entry.province===p.id),actionAge=recentAction?Date.now()-(Number(recentAction.at)||0):Infinity;
+  const recentSpend=recentAction?.spent>0&&actionAge>=0&&actionAge<1800?recentAction.spent:0;
+  const incomeEvent=state.houseIncomeEvents?.[p.id],incomeAge=incomeEvent?Date.now()-(Number(incomeEvent.at)||0):Infinity,recentIncome=incomeAge>=0&&incomeAge<1800?Number(incomeEvent.amount)||0:0;
+  const recentChanges=actionAge>=0&&actionAge<1800?new Map((recentAction.changes||[]).map(change=>[change.stat,change.delta])):new Map();
+  const houseSpots=state.houseLayouts?.[p.id]||initialHouseSpots(p.id),houseCost=Math.max(100000,Number(state.houseCosts?.[p.id])||100000);
+  const canUse=card=>!ended&&currentRound>0&&houseSpots.length<10&&capital>=houseCost&&Object.entries(card.fx).every(([stat,delta])=>delta>=0||(stat==='Economía'?capital>=-delta*ECONOMY_POINT_VALUE:(p.s[stat]||0)>=-delta));
+  const disabledReason=()=>ended?'La partida terminó':currentRound===0?'Empezá la partida para usar las cartas':houseSpots.length>=10?'Ya alcanzaste el máximo de 10 casas':'No alcanza el capital';
+  const handIds=state.actionHands?.[currentRound]?.[p.id]||[];
+  const statIcons={'Población':'poblacion-icon.png','Economía':'economia-icon.png','Infraestructura':'infraestructura-icon.png','Recursos':'recursos-icon.png','Influencia política':'edificio2.png','Gestión':'gestion-icon.png','Necesidad':'necesidad-icon.png'};
+  const effectIcons={...statIcons};
+  const population=Math.max(0,Math.floor(Number(BASE[P.findIndex(province=>province.id===p.id)]?.['Población'])||0));
+  const houseLevels=state.houseLevels?.[p.id]||initialHouseLevels(p.id,houseSpots.length),houseHealth=state.houseHealth?.[p.id]||houseSpots.map((_,index)=>houseMaxHealth(houseLevels[index]));
+  const houseMarkup=provinceHouseMarkup(p,state);
+  const previewMarkup=card=>card.id==='construir-casas'?'<span class="up"><img src="assets/casa-icon.png" alt="Casa"><b>+1</b></span>':previewCardEffects(p,card,state).replace(/<span class="(up|dn)">([^:]+): ([+-]?\d+) \((\d+) → (\d+)\)<\/span>/g,(_,tone,stat,delta)=>stat==='Necesidad informativa'?'':`<span class="${tone}"><img src="assets/${effectIcons[stat]||'edificio2.png'}" alt=""><b>${delta}</b></span>`);
+  const lockedCard='<button class="province-card province-question start-locked" type="button" data-start-required aria-label="Inicia la partida para comprar"><span class="province-question-mark">?</span><span class="province-start-message">Inicia la partida para comprar</span></button>';
+  const actions=currentRound===0?Array.from({length:3},()=>lockedCard).join(''):handIds.map(id=>ACTION_CARDS.find(card=>card.id===id)).filter(Boolean).map(cardBase=>{const card={...cardBase,cost:houseCost},usable=canUse(card),reason=disabledReason();return `<button class="province-card ${usable?'ready':'unavailable'}" type="button" data-action="${card.id}" data-province="${p.id}" ${usable?'':'disabled'} aria-label="${card.t}. ${usable?'Disponible para usar.':reason}"><span class="province-card-title">${card.t}</span><span class="province-effects">${previewMarkup(card)}</span><span class="province-cost">${new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(card.cost)}$</span></button>`}).join('');
+  return `<div class="province-page" data-province-id="${p.id}" style="--province-accent:${p.c}"><div class="province-houses-layer">${houseMarkup}</div><div class="province-bird-layer" aria-hidden="true"></div><div class="province-person-layer" aria-hidden="true"></div><div class="province-hud-spacer" aria-hidden="true"></div><section class="province-hud" aria-label="Ronda ${currentRound}, capital actual y población ${provinceStats['Población']??population}"><div class="province-hud-item"><img src="assets/ronda-icon.png" alt="Ronda"><strong>${currentRound}</strong></div><div class="province-hud-item province-hud-money"><img src="assets/dinero-icon.png" alt="Capital"><strong>${new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(capital)}</strong>${recentSpend?`<b class="province-money-change" style="--change-delay:-${actionAge}ms" aria-label="Gastaste ${new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(recentSpend)}">-${new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(recentSpend)}</b>`:''}${recentIncome?`<b class="province-money-gain" style="--change-delay:-${incomeAge}ms" aria-label="Ganaste ${new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(recentIncome)} por segundo">+${new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(recentIncome)}</b>`:''}</div><div class="province-hud-item province-hud-population"><img src="assets/poblacion-icon.png" alt="Población"><strong>${provinceStats['Población']??population}</strong></div></section>
+  <header class="province-hero"><span class="province-name-wrap"><button class="province-name-change" id="name-open-button" type="button" aria-label="${savedPersonName?'Cambiar nombre':'Ponerte un nombre'}" title="${savedPersonName?'Cambiar nombre':'Ponerte un nombre'}"><img src="assets/changename.png" alt=""></button><span class="province-name-label" id="province-name-label">${savedPersonName}</span></span><h1 class="province-title ${p.id==='tf'?'province-title-long':''}" data-title="${p.n}">${p.n}</h1></header>
+  <section class="province-scene" aria-hidden="true"></section>
+  <div class="province-layout"><section class="province-stats" aria-label="Estadísticas de ${p.n}">${STAT_ORDER.filter(k=>k!=='Influencia política').map(k=>{const delta=recentChanges.get(k);return `<div class="province-stat" data-stat="${k}"><img src="assets/${statIcons[k]}" alt=""><span>${k}: <strong>${formatStat(provinceStats[k]??0)}</strong>${delta?` <b class="province-stat-change ${delta>0?'up':'dn'}" style="--change-delay:-${actionAge}ms" aria-label="${delta>0?'aumentó':'disminuyó'} ${Math.abs(delta)}">${delta>0?'+':''}${formatStat(delta)}</b>`:''}</span></div>`}).join('')}</section>
+  <section class="province-section" aria-label="Cartas de acción"><div class="province-cards">${actions||'<div class="province-card province-question" aria-label="Preparando las cartas">?</div>'}</div></section></div><div class="province-start-toast" role="status" aria-live="polite">Inicia la partida para comprar</div>
+  </div>`;
+}
+let pendingHouseUpgrade=null;
+function openHouseUpgrade(provinceId,index){const state=accrueHouseIncome(migrateState(window.fondosSync?.state||{}),Date.now()),province=P.find(item=>item.id===provinceId),levels=state.houseLevels?.[provinceId]||initialHouseLevels(provinceId,(state.houseLayouts?.[provinceId]||initialHouseSpots(provinceId)).length),level=Number(levels[index])||1,capital=Number(state.capitals?.[provinceId])||0,round=Math.min(Number(state.round??state.drawn?.length??0),10),button=$('#house-upgrade-confirm');if(!province)return;pendingHouseUpgrade={provinceId,index};$('#house-upgrade-title').textContent=`Casa de ${province.n}`;let message=level>=2?'Esta casa ya está en nivel 2.':`Mejorala al nivel 2 por $100.000. Generará $250 por segundo y sumará 1 punto adicional de población e infraestructura.`;if(round===0)message+=' Inicia la partida para mejorar casas.';else if(isRoundPaused(state,Date.now()))message+=' Esperá a que comience la siguiente ronda.';else if(capital<100000)message+=' No alcanza el dinero disponible.';$('#house-upgrade-description').textContent=message;button.disabled=level>=2||round===0||!!state.ended||isRoundPaused(state,Date.now())||capital<100000;$('#house-upgrade-prompt').hidden=false;refreshProvincePurchaseAvailability(state)}
+function closeHouseUpgrade(){$('#house-upgrade-prompt').hidden=true;pendingHouseUpgrade=null}
+function upgradeHouse(){if(!pendingHouseUpgrade)return;const {provinceId:id,index}=pendingHouseUpgrade,sync=window.fondosSync,upgrade=raw=>{const current=accrueHouseIncome(migrateState(raw||{}),Date.now()),round=Math.min(Number(current.round??current.drawn?.length??0),10),capital=Number(current.capitals?.[id])||0,houseLayouts={...(current.houseLayouts||{})},levels={...(current.houseLevels||{})},houseHealth={...(current.houseHealth||{})},provinceSpots=houseLayouts[id]||initialHouseSpots(id),provinceLevels=[...(levels[id]||initialHouseLevels(id,provinceSpots.length))],provinceHealth=[...(houseHealth[id]||provinceSpots.map((_,i)=>houseMaxHealth(provinceLevels[i])))];if(current.ended||round===0||isRoundPaused(current,Date.now())||index>=provinceSpots.length||Number(provinceLevels[index])>=2||capital<100000)return raw;const stats={...current.stats,[id]:{...current.stats?.[id]}},managementBase={...(current.managementBase||{})},changes=[],beforePopulation=Number(stats[id].Población)||0,beforeInfrastructure=Number(stats[id].Infraestructura)||0,beforeEconomy=Number(stats[id].Economía)||0,beforeResources=Number(stats[id].Recursos)||0,beforeManagement=Number(stats[id].Gestión)||0,nextCapital=capital-100000;provinceLevels[index]=2;provinceHealth[index]=Math.min(25,(Number(provinceHealth[index])||10)+15);houseHealth[id]=provinceHealth;levels[id]=provinceLevels;stats[id].Población=beforePopulation+1;stats[id].Infraestructura=beforeInfrastructure+1;changes.push({stat:'Población',delta:1,before:beforePopulation,after:stats[id].Población},{stat:'Infraestructura',delta:1,before:beforeInfrastructure,after:stats[id].Infraestructura});stats[id].Economía=Math.floor(nextCapital/ECONOMY_POINT_VALUE);if(stats[id].Economía!==beforeEconomy)changes.push({stat:'Economía',delta:stats[id].Economía-beforeEconomy,before:beforeEconomy,after:stats[id].Economía});stats[id].Recursos=stats[id].Infraestructura+stats[id].Economía;if(stats[id].Recursos!==beforeResources)changes.push({stat:'Recursos',delta:stats[id].Recursos-beforeResources,before:beforeResources,after:stats[id].Recursos});stats[id].Gestión=Math.max(0,(Number(managementBase[id])||0)-Math.floor(Math.max(0,nextCapital-(BASE_CAPITALS[id]||0))/ECONOMY_POINT_VALUE));if(stats[id].Gestión!==beforeManagement)changes.push({stat:'Gestión',delta:stats[id].Gestión-beforeManagement,before:beforeManagement,after:stats[id].Gestión});recordNeedChange(id,stats[id],changes);const at=Date.now();return {...current,stats,managementBase,capitals:{...(current.capitals||{}),[id]:nextCapital},houseLevels:levels,houseHealth,capitalHistory:[...(current.capitalHistory||[]),{province:id,round,amount:-100000,at,kind:'mejora-casa',house:index}],actionHistory:[...(current.actionHistory||[]),{province:id,round,card:'mejorar-casa',cardName:'Mejorar casa',house:index,changes,spent:100000,at}]}};if(sync?.ready&&sync.update){sync.update(upgrade).then(state=>{sync.state=state;drawn=state?.drawn||drawn;saveLocalState();closeHouseUpgrade();route()}).catch(error=>{sync.status='No se pudo mejorar la casa: '+error.message;closeHouseUpgrade();route()})}else{sync.state=upgrade(sync.state||{});saveLocalState();closeHouseUpgrade();route()}}
+function gamePage(){
+  const sharedDrawn=window.fondosSync.ready&&window.fondosSync.state?.drawn?window.fondosSync.state.drawn:drawn;
+  const remaining=EV.map((_,i)=>i).filter(i=>!sharedDrawn.includes(i));
+  const currentRound=Math.min(window.fondosSync.state?.round??sharedDrawn.length,10),ended=!!window.fondosSync.state?.ended,confirmed=!!window.fondosSync.state?.confirmedRounds?.[currentRound],freeMoney=(BUDGET_UNITS-Object.values(vals).reduce((sum,value)=>sum+value,0))*BUDGET_STEP;
+  const canAdvance=remaining.length&&!ended&&(currentRound===0||confirmed),topic=TOPICS[Math.max(0,currentRound-1)];
+  return `${gameHud(currentRound,freeMoney,ended,'PRESUPUESTO LIBRE')}<div class="syncbox" id="sync-status"></div>${currentRound===10&&!ended?'<div class="round-left" style="margin-top:8px">Llegaste a la ronda 10. La partida sigue abierta hasta que pulses Terminar.</div>':''}<section class="event-log" style="--event-color:var(--cy)"><h3>${topic.e} ${currentRound===0?'PRÓXIMO TEMA':'TEMA DE LA RONDA '+currentRound+': '+topic.t}</h3><p>${currentRound===0?`La primera ronda tratará sobre ${topic.t.toLowerCase()}. ${topic.d}`:topic.d}</p></section><h2>Noticias de la partida</h2>
+  <div class="deckbar"><button class="btn" type="button" id="next-round" ${canAdvance?'':'disabled'}>➡️ Siguiente ronda</button>
+  ${ended?'<button class="btn alt" type="button" id="shuffle">Nueva partida</button>':''}
+  <span class="left">Quedan ${remaining.length} noticias por descubrir</span></div>
+  <div class="slots" id="slots">${EV.map((ev,i)=>sharedDrawn.includes(i)?`<button class="slot on" style="--c:${ev.c}" data-i="${i}" type="button"><span><span class="em">📰</span><b>${ev.t}</b></span></button>`:`<div class="slot q" aria-label="Noticia todavía no revelada">📰</div>`).join('')}</div>
+  <h2>Presupuesto para ${topic.t}: ${money(BUDGET_TOTAL)}</h2>
+  <div class="hud"><span>Repartido: <b id="used"></b></span><span>Disponible: <b id="free"></b></span></div>
+  <div id="rows">${P.map(p=>`<div class="row" style="--c:${p.c}"><label for="r-${p.id}">${p.e} ${p.n}</label><input type="range" id="r-${p.id}" min="0" max="${BUDGET_UNITS}" step="1" value="${vals[p.id]}" data-id="${p.id}" ${currentRound===0||ended||confirmed?'disabled':''}><div class="pts" id="v-${p.id}">${money(vals[p.id]*BUDGET_STEP)}</div></div>`).join('')}</div>
+  <div style="margin-top:18px;display:flex;gap:12px;flex-wrap:wrap"><button class="btn" type="button" id="vote" ${currentRound===0||ended||confirmed?'disabled':''}>${confirmed?'Reparto confirmado':'Confirmar reparto'}</button><button class="btn alt" type="button" id="finish" ${ended?'disabled':''}>${ended?'Partida terminada':'⏹ Terminar partida'}</button></div>
+  <div class="hud" id="result" style="margin-top:16px;display:block" aria-live="polite">${voteHTML|| (currentRound===0?'La partida todavía no comenzó. Pulsa Siguiente ronda para ver el tema y la primera noticia.':confirmed?'El reparto está confirmado. Ya podés pasar a la siguiente ronda.':'Distribuí los US$ 100.000. Los controles avanzan de US$ 2.500 en US$ 2.500.')}</div>`;
+}
+let observedBudgetRound=null,observedBudgetConfirmation=null;
+function syncBudgetRound(){
+  const state=window.fondosSync.state||{},round=Math.min(state.round??drawn.length,10),confirmed=!!state.confirmedRounds?.[round];
+  if(round!==observedBudgetRound||confirmed!==observedBudgetConfirmation){const allocation=confirmed?state.allocations?.[round]:null;P.forEach(p=>vals[p.id]=allocation?Math.round((allocation[p.id]||0)/BUDGET_STEP):0);observedBudgetRound=round;observedBudgetConfirmation=confirmed}
+}
+function upd(){
+  const u=Object.values(vals).reduce((a,b)=>a+b,0),free=BUDGET_UNITS-u;
+  if($('#hud-money'))$('#hud-money').textContent=money(free*BUDGET_STEP);
+  $('#used').textContent=money(u*BUDGET_STEP);$('#used').className=u===BUDGET_UNITS?'ok':'';
+  $('#free').textContent=money(free*BUDGET_STEP);$('#free').className=free===0?'ok':'';
+  P.forEach(p=>{const slider=$('#r-'+p.id);$('#v-'+p.id).textContent=money(vals[p.id]*BUDGET_STEP);slider.value=vals[p.id]});
+  const state=window.fondosSync.state||{},round=Math.min(state.round??drawn.length,10);
+  $('#vote').disabled=u!==BUDGET_UNITS||round===0||!!state.ended||!!state.confirmedRounds?.[round];
+}
+function route(){
+  syncBudgetRound();
+  const h=location.hash.slice(1),p=P.find(x=>SL[x.id]===h);
+  if(p)$('#page').innerHTML=provincePage(p);
+  else if(h==='votacion'){$('#page').innerHTML=gamePage();upd()}
+  else $('#page').innerHTML=`<section class="sheet" style="--c:var(--ye)"><h1 style="color:var(--ye);font-size:18px;margin:0 0 12px">FONDOS DE LA NACIÓN</h1><p style="margin:0 0 10px">Esta página tiene 7 secciones separadas. Cada una se abre agregando su nombre después del # en la dirección:</p><p style="margin:0;color:var(--cy)">#buenosaires<br>#cordoba<br>#mendoza<br>#salta<br>#misiones<br>#tierradelfuego<br>#votacion</p></section>`;
+  updateProvinceBirds(!!p);
+  updateProvincePeople(!!p);
+  updateProvinceAcidRain();
+  positionProvinceNameButton();
+  updateRoundClock();
+  window.scrollTo(0,0);
+  const box=$('#sync-status');if(box)box.innerHTML=`${window.fondosSync?.status||'Preparando conexión…'}<small>Para compartir el estado, todos deben usar el mismo enlace y código de sala.</small>`;
+}
+function positionProvinceNameButton(){const wrap=document.querySelector('.province-name-wrap');if(!wrap)return;const size=Math.min(innerWidth*.1125,101.25);wrap.style.width=`${size}px`;wrap.style.height=`${size}px`}
+function openCard(i){
+  const ev=EV[i];
+  $('#continue-news').style.display='none';
+  $('#big').style.setProperty('--c',ev.c);
+  $('#oem').textContent=ev.e;$('#otitle').textContent=ev.t;$('#odesc').textContent=ev.d;
+  $('#oeff').innerHTML=chgs[i]||'';
+  $('#ov').classList.add('show');$('#close').focus();
+}
+let pendingNews=null;
+function openRoundIntro(round,i){
+  const topic=TOPICS[round-1];pendingNews=i;
+  $('#big').style.setProperty('--c','#38f0ff');$('#oem').textContent=topic.e;
+  $('#otitle').textContent=`Ronda ${round}: ${topic.t}`;$('#odesc').textContent=topic.d;
+  $('#oeff').innerHTML='';$('#continue-news').style.display='inline-block';
+  $('#ov').classList.add('show');$('#continue-news').focus();
+}
+$('#continue-news').onclick=()=>{if(pendingNews!==null)openCard(pendingNews)};
+function playAction(selection){
+  const {provinceId:id,cardId,round}=selection,card=ACTION_CARDS.find(item=>item.id===cardId),sync=window.fondosSync;if(!card)return;
+    const useAction=raw=>{const current=accrueHouseIncome(migrateState(raw||{}),Date.now()),capital=current.capitals?.[id]??BASE_CAPITALS[id],stats={...current.stats,[id]:{...current.stats?.[id]}},managementBase={...(current.managementBase||{})},changes=[],spent=Math.max(100000,Number(current.houseCosts?.[id])||100000),houseLayouts={...(current.houseLayouts||{})},houseLevels={...(current.houseLevels||{})},houseHealth={...(current.houseHealth||{})},existingHouses=houseLayouts[id]||initialHouseSpots(id);if(current.ended||isRoundPaused(current,Date.now())||round===0||current.round!==round||!current.actionHands?.[round]?.[id]?.includes(cardId)||existingHouses.length>=10||capital<spent)return raw;
+    const newHouseSpot=findAvailableHouseSpot(existingHouses);if(!newHouseSpot)return raw;houseLayouts[id]=[...existingHouses,newHouseSpot];houseLevels[id]=[...(houseLevels[id]||initialHouseLevels(id,existingHouses.length)),1];houseHealth[id]=[...(houseHealth[id]||existingHouses.map((_,index)=>houseMaxHealth(houseLevels[id][index]))),10];
+    if(Object.entries(card.fx).some(([stat,delta])=>delta<0&&(stat==='Economía'?capital<(-delta*ECONOMY_POINT_VALUE):(stats[id][stat]||0)<-delta)))return raw;
+    const beforeEconomy=Number(stats[id].Economía)||0,beforeResources=Number(stats[id].Recursos)||0,beforeGestion=Number(stats[id].Gestión)||0,beforePopulation=Number(stats[id].Población)||0;let nextCapital=Math.max(0,capital-spent);
+    Object.entries(card.fx).forEach(([stat,delta])=>{if(stat==='Necesidad'||stat==='Gestión')return;const before=stats[id][stat]||0;let after;if(stat==='Economía'){nextCapital=Math.max(0,nextCapital+delta*ECONOMY_POINT_VALUE);after=Math.floor(nextCapital/ECONOMY_POINT_VALUE)}else after=Math.max(0,before+delta);stats[id][stat]=after;const actual=after-before;if(actual)changes.push({stat,delta:actual,before,after})});
+    stats[id].Población=beforePopulation+1;changes.push({stat:'Población',delta:1,before:beforePopulation,after:stats[id].Población});
+    if(Object.hasOwn(card.fx,'Gestión'))managementBase[id]=Math.max(0,(Number(managementBase[id])||0)+card.fx.Gestión);
+    stats[id].Economía=Math.floor(nextCapital/ECONOMY_POINT_VALUE);
+    if(!Object.hasOwn(card.fx,'Economía')&&stats[id].Economía!==beforeEconomy)changes.push({stat:'Economía',delta:stats[id].Economía-beforeEconomy,before:beforeEconomy,after:stats[id].Economía});
+    stats[id].Recursos=(Number(stats[id].Infraestructura)||0)+stats[id].Economía;
+    if(stats[id].Recursos!==beforeResources)changes.push({stat:'Recursos',delta:stats[id].Recursos-beforeResources,before:beforeResources,after:stats[id].Recursos});
+    const afterGestion=Math.max(0,(Number(managementBase[id])||0)-Math.floor(Math.max(0,nextCapital-(BASE_CAPITALS[id]||0))/ECONOMY_POINT_VALUE));stats[id].Gestión=afterGestion;
+    if(afterGestion!==beforeGestion)changes.push({stat:'Gestión',delta:afterGestion-beforeGestion,before:beforeGestion,after:afterGestion});
+    recordNeedChange(id,stats[id],changes);
+    const at=Date.now();
+    return {...current,managementBase,stats,capitals:{...current.capitals,[id]:nextCapital},houseLayouts,houseLevels,houseHealth,houseCosts:{...(current.houseCosts||{}),[id]:spent*2},capitalHistory:nextCapital!==capital?[...current.capitalHistory,{province:id,round,amount:nextCapital-capital,at,kind:'accion',card:card.id}]:current.capitalHistory,actionUses:{...(current.actionUses||{}),[id]:{...(current.actionUses?.[id]||{}),[round]:card.id}},actionHistory:[...(current.actionHistory||[]),{province:id,round,card:card.id,cardName:card.t,changes,spent,at}]};
+  };
+  const done=state=>{sync.state=state;drawn=state?.drawn||drawn;if(state?.stats)P.forEach(p=>p.s={...state.stats[p.id]});saveLocalState();route()};
+  if(sync.ready&&sync.update)sync.update(useAction).then(done).catch(error=>{sync.status='No se pudo guardar la carta: '+error.message;route()});else done(useAction(sync.state||{}));
+}
+function closeCard(){$('#ov').classList.remove('show')}
+function showStartRequiredToast(){const toast=document.querySelector('.province-start-toast');if(!toast)return;toast.classList.remove('show');void toast.offsetWidth;toast.classList.add('show')}
+function draw(){
+  const sync=window.fondosSync;
+  const currentDrawn=sync?.ready?(sync.state?.drawn||[]):drawn;
+  const currentRound=Math.min(sync?.state?.round??currentDrawn.length,10);
+  if(sync?.state?.ended||(currentRound>0&&!sync?.state?.confirmedRounds?.[currentRound]))return;
+  const available=EV.map((_,i)=>i).filter(i=>!currentDrawn.includes(i));
+  if(!available.length)return;
+  const i=currentRound,chg=[],roundStartedAt=Date.now(),acidRainSchedules=Object.fromEntries(P.map(province=>[province.id,createProvinceAcidRainSchedule(roundStartedAt)]));
+  const apply=state=>{const next=accrueHouseIncome(migrateState(state||{stats:Object.fromEntries(P.map((p,i)=>[p.id,{...BASE[i]}])),drawn:[],history:[],round:0}),Date.now());if(next.drawn?.includes(i))return state;const round=Math.min(next.round??(next.drawn||[]).length,10);if(round>0&&!next.confirmedRounds?.[round])return undefined;const history=next.history||[],capitals={...BASE_CAPITALS,...next.capitals},capitalHistory=[...(next.capitalHistory||[])];Object.entries(EV[i].fx).forEach(([id,m])=>{const p=P.find(x=>x.id===id),changes=[],s=next.stats?.[id]||{...BASE[P.indexOf(p)]},beforeEconomy=Number(s.Economía)||0,beforeResources=Number(s.Recursos)||0,beforeGestion=Number(s.Gestión)||0,oldCapital=Number(capitals[id])||0;Object.entries(m).forEach(([k,d])=>{if(k==='Necesidad'||k==='Gestión')return;const before=s[k]??0;let after,actual;if(k==='Economía'){capitals[id]=Math.max(0,oldCapital+d*ECONOMY_POINT_VALUE);after=Math.floor(capitals[id]/ECONOMY_POINT_VALUE);actual=after-before;if(capitals[id]!==oldCapital)capitalHistory.push({province:id,round:round+1,amount:capitals[id]-oldCapital,at:Date.now(),kind:'noticia',event:EV[i].t})}else{after=Math.max(0,before+d);actual=after-before}s[k]=after;if(actual&&k!=='Economía'){chg.push(`<span class="${actual>0?'up':'dn'}">${p.n}: ${k} ${actual>0?'+':''}${actual}</span>`);changes.push({stat:k,delta:actual,before,after})}});if(Object.hasOwn(m,'Gestión'))next.managementBase[id]=Math.max(0,(Number(next.managementBase?.[id])||0)+m.Gestión);s.Economía=Math.floor((Number(capitals[id])||0)/ECONOMY_POINT_VALUE);if(s.Economía!==beforeEconomy){const delta=s.Economía-beforeEconomy;chg.push(`<span class="${delta>0?'up':'dn'}">${p.n}: Economía ${delta>0?'+':''}${delta}</span>`);changes.push({stat:'Economía',delta,before:beforeEconomy,after:s.Economía})}s.Recursos=(Number(s.Infraestructura)||0)+s.Economía;if(s.Recursos!==beforeResources){const delta=s.Recursos-beforeResources;chg.push(`<span class="${delta>0?'up':'dn'}">${p.n}: Recursos ${delta>0?'+':''}${delta}</span>`);changes.push({stat:'Recursos',delta,before:beforeResources,after:s.Recursos})}s.Gestión=Math.max(0,(Number(next.managementBase?.[id])||0)-Math.floor(Math.max(0,(Number(capitals[id])||0)-(BASE_CAPITALS[id]||0))/ECONOMY_POINT_VALUE));if(s.Gestión!==beforeGestion){const delta=s.Gestión-beforeGestion;chg.push(`<span class="${delta>0?'up':'dn'}">${p.n}: Gestión ${delta>0?'+':''}${delta}</span>`);changes.push({stat:'Gestión',delta,before:beforeGestion,after:s.Gestión})}(next.stats??={})[id]=s;recordNeedChange(id,s,changes,chg);if(changes.length)history.push({province:id,changes,event:EV[i].t,card:i,at:Date.now()})});const nextDrawn=[...(next.drawn||[]),i],nextRound=nextDrawn.length,actionHands={...(next.actionHands||{})};if(nextRound>0&&!actionHands[nextRound])actionHands[nextRound]=dealActionHands();return {...next,actionHands,actionHandVersion:ACTION_HAND_VERSION,acidRainSchedules,acidHouseDamageAt:{},capitals,capitalHistory,drawn:nextDrawn,round:nextRound,roundStartedAt,houseIncomeAt:roundStartedAt,history}};
+  if(sync?.ready&&sync.update){sync.update(apply).then(state=>{if(!state?.drawn?.includes(i)){sync.state=state;sync.status='Confirmá el reparto de esta ronda antes de avanzar.';route();return}sync.state=state;drawn=state.drawn||[];P.forEach(p=>p.s={...(state.stats?.[p.id]||BASE[P.indexOf(p)])});P.forEach(p=>vals[p.id]=0);voteHTML='';saveLocalState();chgs[i]=chg.join('');route();openRoundIntro(state.round,i)}).catch(error=>{sync.status='No se pudo guardar: '+error.message;route()});return}
+  const state=apply({stats:Object.fromEntries(P.map(p=>[p.id,{...p.s}])),drawn:drawn.filter(n=>n!==i),history:window.fondosSync.state?.history||[]});drawn=state.drawn;P.forEach(p=>p.s={...state.stats[p.id]});P.forEach(p=>vals[p.id]=0);voteHTML='';window.fondosSync.state={...(window.fondosSync.state||{}),...state};saveLocalState();chgs[i]=chg.join('');route();openRoundIntro(state.round,i);
+}
+$('#page').addEventListener('click',e=>{
+  if(e.target.closest('#next-round'))draw();
+  else if(e.target.closest('[data-upgrade-house]')){const house=e.target.closest('[data-upgrade-house]'),province=house.closest('.province-page');openHouseUpgrade(province?.dataset.provinceId,Number(house.dataset.upgradeHouse))}
+  else if(e.target.closest('[data-start-required]'))showStartRequiredToast();
+  else if(e.target.closest('[data-action]')){
+    const button=e.target.closest('[data-action]'),sync=window.fondosSync;
+    if(button.classList.contains('tap-pulse'))return;
+    button.classList.add('tap-pulse');
+    const selection={provinceId:button.dataset.province,cardId:button.dataset.action,round:Math.min(sync.state?.round??drawn.length,10)};
+    window.setTimeout(()=>playAction(selection),260);
+    window.setTimeout(()=>button.classList.remove('tap-pulse'),320);
+  }
+  else if(e.target.closest('#finish')){
+    const sync=window.fondosSync;
+    if(sync?.ready&&sync.update){sync.update(state=>({...accrueHouseIncome(state,Date.now()),ended:true})).then(state=>{sync.state=state;drawn=state.drawn||[];saveLocalState();route()}).catch(error=>{sync.status='No se pudo terminar la partida: '+error.message;route()})}
+    else{window.fondosSync.state={...accrueHouseIncome(window.fondosSync.state||{},Date.now()),ended:true};saveLocalState();route()}
+  }
+  else if(e.target.closest('#shuffle')){
+    const sync=window.fondosSync,houseLayouts=dealHouseLayouts();
+    const houseLevels=initialAllHouseLevels(houseLayouts),houseHealth=initialAllHouseHealth(houseLayouts,houseLevels);
+    if(sync?.ready&&sync.update){sync.update(()=>({capitalVersion:CAPITAL_VERSION,provinceRulesVersion:PROVINCE_RULES_VERSION,houseLayoutVersion:HOUSE_LAYOUT_VERSION,houseCostVersion:HOUSE_COST_VERSION,houseLevelVersion:HOUSE_LEVEL_VERSION,houseLevels,houseHealthVersion:HOUSE_HEALTH_VERSION,houseHealth,acidHouseDamageAt:{},houseCosts:Object.fromEntries(P.map(p=>[p.id,100000])),managementBase:Object.fromEntries(P.map((p,i)=>[p.id,BASE[i].Gestión])),stats:Object.fromEntries(P.map((p,i)=>[p.id,{...BASE[i]}])),capitals:{...BASE_CAPITALS},capitalHistory:[],investmentHistory:[],investmentUsed:{},actionUses:{},actionHistory:[],actionHands:{},nextHouseCost:100000,drawn:[],round:0,roundStartedAt:null,ended:false,history:[],allocations:{},confirmedRounds:{},houseLayouts,houseIncomeAt:null,houseIncomeEvents:{}})).then(state=>{sync.state=state;drawn=[];P.forEach((p,i)=>p.s={...BASE[i]});P.forEach(p=>vals[p.id]=0);voteHTML='';saveLocalState();newDeck();route()}).catch(error=>{sync.status='No se pudo iniciar una nueva partida: '+error.message;route()})}
+    else{newDeck();P.forEach(p=>vals[p.id]=0);voteHTML='';window.fondosSync.state={...(window.fondosSync.state||{}),capitalVersion:CAPITAL_VERSION,provinceRulesVersion:PROVINCE_RULES_VERSION,houseLayoutVersion:HOUSE_LAYOUT_VERSION,houseCostVersion:HOUSE_COST_VERSION,houseLevelVersion:HOUSE_LEVEL_VERSION,houseLevels,houseHealthVersion:HOUSE_HEALTH_VERSION,houseHealth,acidHouseDamageAt:{},houseCosts:Object.fromEntries(P.map(p=>[p.id,100000])),managementBase:Object.fromEntries(P.map((p,i)=>[p.id,BASE[i].Gestión])),round:0,roundStartedAt:null,ended:false,history:[],allocations:{},confirmedRounds:{},stats:Object.fromEntries(P.map((p,i)=>[p.id,{...BASE[i]}])),capitals:{...BASE_CAPITALS},capitalHistory:[],investmentHistory:[],investmentUsed:{},actionUses:{},actionHistory:[],actionHands:{},nextHouseCost:100000,houseLayouts,houseIncomeAt:null,houseIncomeEvents:{}};saveLocalState();route()}
+  }
+  else if(e.target.closest('#vote')){
+    const used=Object.values(vals).reduce((a,b)=>a+b,0);
+    const sync=window.fondosSync,round=Math.min(sync.state?.round??drawn.length,10);
+    if(used===BUDGET_UNITS&&round>0&&!sync.state?.ended&&!sync.state?.confirmedRounds?.[round]){
+      const allocation=Object.fromEntries(P.map(p=>[p.id,vals[p.id]*BUDGET_STEP]));
+      const confirm=raw=>{const current=accrueHouseIncome(migrateState(raw||{}),Date.now());if(current.confirmedRounds?.[round])return current;const capitals={...BASE_CAPITALS,...(current.capitals||{})},stats={...current.stats},capitalHistory=[...(current.capitalHistory||[])];P.forEach(p=>{const amount=allocation[p.id]||0;capitals[p.id]+=amount;stats[p.id]={...stats[p.id],Economía:Math.floor(capitals[p.id]/ECONOMY_POINT_VALUE)};stats[p.id].Recursos=(Number(stats[p.id].Infraestructura)||0)+stats[p.id].Economía;const excess=Math.max(0,capitals[p.id]-(BASE_CAPITALS[p.id]||0));stats[p.id].Gestión=Math.max(0,(Number(current.managementBase?.[p.id])||0)-Math.floor(excess/ECONOMY_POINT_VALUE));stats[p.id].Necesidad=deriveNeed(stats[p.id]);if(amount)capitalHistory.push({province:p.id,round,amount,at:Date.now(),kind:'reparto'})});return {...current,stats,capitals,capitalHistory,allocations:{...(current.allocations||{}),[round]:allocation},confirmedRounds:{...(current.confirmedRounds||{}),[round]:true}}};
+      if(sync.ready&&sync.update)sync.update(confirm).then(state=>{sync.state=state;voteHTML=`<b class="ok">Dinero repartido y capitales actualizados en la ronda ${round}.</b>`;saveLocalState();route()}).catch(error=>{sync.status='No se pudo repartir el dinero: '+error.message;route()});
+      else{sync.state=confirm(sync.state||{});voteHTML=`<b class="ok">Dinero repartido y capitales actualizados en la ronda ${round}.</b>`;saveLocalState();route()}
+    }}
+  else{const b=e.target.closest('.slot.on');if(b)openCard(+b.dataset.i)}
+});
+$('#page').addEventListener('input',e=>{if(e.target.dataset.id){const id=e.target.dataset.id,others=Object.entries(vals).reduce((sum,[key,n])=>sum+(key===id?0:n),0);vals[id]=Math.min(+e.target.value,BUDGET_UNITS-others);voteHTML='';$('#result').innerHTML='Distribuí los US$ 100.000. Los controles avanzan de US$ 2.500 en US$ 2.500.';upd()}});
+$('#close').onclick=closeCard;
+$('#ov').addEventListener('click',e=>{if(e.target.id==='ov')closeCard()});
+$('#house-upgrade-confirm').addEventListener('click',upgradeHouse);
+$('#house-upgrade-cancel').addEventListener('click',closeHouseUpgrade);
+$('#house-upgrade-prompt').addEventListener('click',e=>{if(e.target.id==='house-upgrade-prompt')closeHouseUpgrade()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeCard();closeHouseUpgrade()}});
+window.addEventListener('hashchange',route);
+window.addEventListener('resize',positionProvinceNameButton,{passive:true});
+document.fonts?.ready?.then(positionProvinceNameButton);
+const savedPersonNameKey='fondos-display-name-v1';let savedPersonName=localStorage.getItem(savedPersonNameKey)||'';
+function showNamePrompt(){const prompt=$('#name-prompt'),input=$('#name-prompt-input');input.value=savedPersonName;$('#name-prompt-error').textContent='';prompt.hidden=false;requestAnimationFrame(()=>input.focus())}
+function setActivePersonName(name){const activeName=(name||'').trim().slice(0,24);window.fondosSync.displayName=activeName;window.dispatchEvent(new CustomEvent('fondos-presence-name',{detail:{name:activeName}}));const button=$('#name-open-button'),label=$('#province-name-label');if(button){button.setAttribute('aria-label',activeName?'Cambiar nombre':'Ponerte un nombre');button.title=activeName?'Cambiar nombre':'Ponerte un nombre'}if(label)label.textContent=activeName}
+document.addEventListener('click',event=>{if(event.target.closest('#name-open-button'))showNamePrompt()});
+$('#name-prompt-ready').addEventListener('click',()=>{const name=$('#name-prompt-input').value.trim();if(!name){$('#name-prompt-error').textContent='Escribí un nombre o elegí “Más tarde”.';return}savedPersonName=name;localStorage.setItem(savedPersonNameKey,name);setActivePersonName(name);$('#name-prompt').hidden=true});
+$('#name-prompt-later').addEventListener('click',()=>{setActivePersonName('');$('#name-prompt').hidden=true});
+$('#name-prompt-input').addEventListener('keydown',event=>{if(event.key==='Enter')$('#name-prompt-ready').click()});
+window.addEventListener('fondos-presence',()=>{const connectedNames=new Set((window.fondosSync?.connectedPeople||[]).map(person=>person.name).filter(Boolean));document.querySelectorAll('.province-person-name').forEach(label=>{if(!connectedNames.has(label.dataset.personName))label.remove()})});
+window.addEventListener('load',showNamePrompt,{once:true});
+window.addEventListener('fondos-sync',()=>{const s=window.fondosSync;if(!s.ready)return;drawn=s.state?.drawn||[];const activeRound=Math.min(s.state?.round??s.state?.drawn?.length??0,10),needsRepair=s.state&&(s.state.capitalVersion!==CAPITAL_VERSION||s.state.needVersion!==NEED_VERSION||s.state.provinceRulesVersion!==PROVINCE_RULES_VERSION||s.state.houseLayoutVersion!==HOUSE_LAYOUT_VERSION||s.state.houseCostVersion!==HOUSE_COST_VERSION||s.state.houseLevelVersion!==HOUSE_LEVEL_VERSION||(Number(s.state.round)>0&&!Number(s.state.roundStartedAt))||s.state.actionHandVersion!==ACTION_HAND_VERSION||(activeRound>0&&(!s.state.actionHands?.[activeRound]||P.some(p=>s.state.actionHands[activeRound][p.id]?.length!==3))));if(needsRepair&&s.update){s.update(state=>ensureCurrentActionHands(migrateState(state))).then(state=>{s.state=state;P.forEach((p,i)=>p.s={...(state.stats?.[p.id]||BASE[i])});saveLocalState();route()}).catch(error=>{s.status='No se pudo actualizar el estado compartido: '+error.message;route()});return}if(s.state){s.state=ensureCurrentActionHands(s.state);P.forEach((p,i)=>p.s={...(s.state.stats?.[p.id]||BASE[i])});saveLocalState()}route()});
+window.fondosReady?.then(()=>{const s=window.fondosSync;if(s.ready){drawn=s.state?.drawn||[];P.forEach((p,i)=>p.s={...(s.state?.stats?.[p.id]||BASE[i])});route()}});
+window.setInterval(tickHouseIncome,1000);
+window.setInterval(updateProvinceAcidRain,500);
+window.setInterval(tickAcidHouseDamage,500);
+route();
+</script>
+</body>
+</html>
